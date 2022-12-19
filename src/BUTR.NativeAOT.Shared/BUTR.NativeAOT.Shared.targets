@@ -1,0 +1,14 @@
+﻿<!--EXTERNAL_PROPERTIES: BUTR_NativeAOT_SharedPackageRoot-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(BUTR_NativeAOT_SharedPackageRoot)include</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <Target Name="EnsurePropsImported" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(BUTR_NativeAOT_SharedPackageRoot)'==''" Text="OpenXRHeadersPackageRoot property missing. Project is malformed. Try removing and re-adding the NuGet reference." />
+  </Target>
+
+</Project>
