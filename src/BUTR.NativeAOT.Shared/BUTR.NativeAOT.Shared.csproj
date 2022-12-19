@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <VersionOverride>0</VersionOverride>
+    <Version>5.0.$(VersionOverride)</Version>
+    <DefineConstants>$(DefineConstants);BUTR_NATIVEAOT_ENABLE_WARNING;</DefineConstants>
+  </PropertyGroup>
+
+  <!--NuGet Package-->
+  <PropertyGroup>
+    <Authors>BUTR</Authors>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/BUTR/BUTR.NativeAOT.Shared</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/BUTR/BUTR.NativeAOT.Shared.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>BUTR.NativeAOT.Shared.Source</PackageId>
+    <PackageDescription>Source code for managing native code.</PackageDescription>
+    <Title>BUTR.NativeAOT.Shared.Source</Title>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <BuildProjectReferences>false</BuildProjectReferences>
+    <BuildOnPack>false</BuildOnPack>
+    <PackOnBuild>false</PackOnBuild>
+    <PackBuildOutput>false</PackBuildOutput>
+    <PackCompile>true</PackCompile>
+    <PackEmbeddedResource>true</PackEmbeddedResource>
+    <EnablePackCleanup>false</EnablePackCleanup>
+    <EnablePackInference>false</EnablePackInference>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">obj</BaseIntermediateOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NuGetizer" Version="0.8.0" />
+    <PackageFile Include="**/*.cs" PackagePath="content\cs\$(TargetFramework)\$(ProjectName)\%(RelativeDir)%(Filename).cs.pp" Exclude="$(BaseIntermediateOutputPath)/**/*.cs" />
+    <PackageFile Include="**/*.cs" PackagePath="contentFiles\cs\$(TargetFramework)\$(ProjectName)\%(RelativeDir)%(Filename).cs.pp" Exclude="$(BaseIntermediateOutputPath)/**/*.cs" />
+  </ItemGroup>
+  <!--NuGet Package-->
+
+</Project>
