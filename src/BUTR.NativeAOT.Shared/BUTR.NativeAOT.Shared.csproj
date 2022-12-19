@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <VersionOverride>0</VersionOverride>
-    <Version>5.0.$(VersionOverride)</Version>
+    <Version>1.0.$(VersionOverride)</Version>
     <DefineConstants>$(DefineConstants);BUTR_NATIVEAOT_ENABLE_WARNING;</DefineConstants>
   </PropertyGroup>
 
