@@ -22,8 +22,8 @@
 // SOFTWARE.
 #endregion
 
-#if !BUTR_NATIVEAOT_ENABLE_WARNING
 #nullable enable
+#if !BUTR_NATIVEAOT_ENABLE_WARNING
 #pragma warning disable
 #endif
 
@@ -170,7 +170,7 @@ namespace BUTR.NativeAOT.Shared
         public SafeStructMallocHandle(TStruct* param): base(new IntPtr(param)) { }
     }
 }
+#nullable restore
 #if !BUTR_NATIVEAOT_ENABLE_WARNING
 #pragma warning restore
-#nullable restore
 #endif
