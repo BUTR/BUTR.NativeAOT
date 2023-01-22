@@ -52,6 +52,8 @@ namespace BUTR.NativeAOT.Shared
                 NativeMemory.Free(handle.ToPointer());
             return true;
         }
+        
+        public ReadOnlySpan<char> ToSpan() => this;
     }
 }
 #nullable restore
