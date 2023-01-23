@@ -38,51 +38,45 @@ namespace BUTR.NativeAOT.Shared
 
     internal static class Utils
     {
-        public static unsafe char* SerializeJsonCopy<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo)
-        {
-            return Copy(JsonSerializer.Serialize<TValue>(value, jsonTypeInfo));
-        }
+        public static unsafe char* SerializeJsonCopy<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => Copy(JsonSerializer.Serialize(value, jsonTypeInfo));
 
-        public static unsafe string SerializeJson<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo)
-        {
-            return JsonSerializer.Serialize<TValue>(value, jsonTypeInfo);
-        }
+        public static string SerializeJson<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => JsonSerializer.Serialize(value, jsonTypeInfo);
 
 
-        public static TValue DeserializeJson<TValue>(SafeStringMallocHandle json, JsonTypeInfo<TValue> jsonTypeInfo)
+        public static TValue DeserializeJson<TValue>(SafeStringMallocHandle json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
         {
             if (json.DangerousGetHandle() == IntPtr.Zero)
             {
-                throw new JsonDeserializationException($"Received null parameter! Type: {typeof(TValue)};");
+                throw new JsonDeserializationException($"Received null parameter! Caller: {caller}, Type: {typeof(TValue)};");
             }
 
-            return DeserializeJson<TValue>((ReadOnlySpan<char>) json, jsonTypeInfo);
+            return DeserializeJson((ReadOnlySpan<char>) json, jsonTypeInfo, caller);
         }
 
-        public static unsafe TValue DeserializeJson<TValue>(param_json* json, JsonTypeInfo<TValue> jsonTypeInfo)
+        public static unsafe TValue DeserializeJson<TValue>(param_json* json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
         {
             if (json is null)
             {
-                throw new JsonDeserializationException($"Received null parameter! Type: {typeof(TValue)};");
+                throw new JsonDeserializationException($"Received null parameter! Caller: {caller}, Type: {typeof(TValue)};");
             }
 
-            return DeserializeJson<TValue>(param_json.ToSpan(json), jsonTypeInfo);
+            return DeserializeJson(param_json.ToSpan(json), jsonTypeInfo, caller);
         }
 
-        private static TValue DeserializeJson<TValue>([StringSyntax(StringSyntaxAttribute.Json)] ReadOnlySpan<char> json, JsonTypeInfo<TValue> jsonTypeInfo)
+        private static TValue DeserializeJson<TValue>([StringSyntax(StringSyntaxAttribute.Json)] ReadOnlySpan<char> json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
         {
             try
             {
-                if (JsonSerializer.Deserialize<TValue>(json, jsonTypeInfo) is not { } result)
+                if (JsonSerializer.Deserialize(json, jsonTypeInfo) is not { } result)
                 {
-                    throw new JsonDeserializationException($"Received null! Type: {typeof(TValue)}; Json:{json};");
+                    throw new JsonDeserializationException($"Received null! Caller: {caller}, Type: {typeof(TValue)}; Json:{json};");
                 }
 
                 return result;
             }
             catch (JsonException e)
             {
-                throw new JsonDeserializationException($"Failed to deserialize! Type: {typeof(TValue)}; Json:{json};", e);
+                throw new JsonDeserializationException($"Failed to deserialize! Caller: {caller}, Type: {typeof(TValue)}; Json:{json};", e);
             }
         }
 
