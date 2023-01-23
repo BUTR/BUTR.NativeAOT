@@ -24,6 +24,7 @@
 #define SRC_COMMON_BINDINGS_H_
 
 #include <memory>
+#include <string>
 
 namespace Common
 {
