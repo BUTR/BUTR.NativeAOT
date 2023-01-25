@@ -36,6 +36,7 @@ namespace Common
 
         typedef char16_t param_string;
         typedef char16_t param_json;
+        typedef uint8_t param_bool;
 
         typedef struct return_value_void
         {
