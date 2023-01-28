@@ -42,9 +42,11 @@
   <ItemGroup>
     <PackageFile Include="**/*.cs" PackagePath="contentFiles\cs\$(TargetFramework)\$(ProjectName)\%(RelativeDir)%(Filename).cs.pp" Exclude="$(BaseIntermediateOutputPath)/**/*.cs" />
     <PackageFile Include="**/*.h" PackagePath="contentFiles\cpp\any\%(RelativeDir)%(Filename).h" BuildAction="Content" CopyToOutput="true" />
+    <PackageFile Include="**/*.hpp" PackagePath="contentFiles\cpp\any\%(RelativeDir)%(Filename).hpp" BuildAction="Content" CopyToOutput="true" />
     <PackageFile Include="**/*.props" PackagePath="build\native\%(Filename).props" Exclude="$(BaseIntermediateOutputPath)/**/*.props" />
     <PackageFile Include="**/*.targets" PackagePath="build\native\%(Filename).targets" Exclude="$(BaseIntermediateOutputPath)/**/*.targets" />
     <PackageFile Include="**/*.h" PackagePath="include\butrnativeaotshared\%(Filename).h" />
+    <PackageFile Include="**/*.hpp" PackagePath="include\butrnativeaotshared\%(Filename).hpp" />
   </ItemGroup>
   <!--NuGet Package-->
 
