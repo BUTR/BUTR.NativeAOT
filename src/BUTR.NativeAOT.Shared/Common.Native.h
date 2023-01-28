@@ -114,7 +114,7 @@ namespace Common
         const auto srcByteLength = srcChar16Length * sizeof(char16_t);
         const auto size = srcByteLength + sizeof(char16_t);
 
-        auto dst = (char16_t *)malloc(size);
+        auto dst = (char16_t *)alloc(size);
         if (dst == nullptr)
         {
             throw std::bad_alloc();
@@ -138,7 +138,7 @@ namespace Common
     T *Create(const T val)
     {
         const auto size = (size_t)sizeof(T);
-        auto dst = (T *)malloc(size);
+        auto dst = (T *)alloc(size);
         if (dst == nullptr)
         {
             throw std::bad_alloc();
