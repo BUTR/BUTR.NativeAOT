@@ -87,8 +87,8 @@ namespace Common
             param_ptr *value;
         } return_value_ptr;
 
-        return_value_ptr* __cdecl alloc(size_t p_handler);
-        return_value_void* __cdecl dealloc(const param_ptr* p_handler);
+        void *__cdecl alloc(size_t size);
+        void __cdecl dealloc(const param_ptr *ptr);
 
 #ifdef __cplusplus
     }
