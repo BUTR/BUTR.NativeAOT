@@ -6,7 +6,7 @@ on:
       - master
     paths:
       - '.github/workflows/publish-nuget.yml'
-      - 'src/BUTR.NativeAOT.Shared/**.cs'
+      - 'src/BUTR.NativeAOT.Shared/**/*'
   workflow_dispatch:
 
 jobs:
