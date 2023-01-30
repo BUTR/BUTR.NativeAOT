@@ -85,7 +85,7 @@ namespace BUTR.NativeAOT.Shared
         {
             var size = (uint) ((str.Length + 1) * 2);
 
-            var dst = (char*) NativeMemory.Alloc(new UIntPtr(size));
+            var dst = (char*) Allocator.Alloc(new UIntPtr(size), true);
             str.CopyTo(new Span<char>(dst, str.Length));
             dst[str.Length] = '\0';
             return dst;
@@ -94,7 +94,7 @@ namespace BUTR.NativeAOT.Shared
         public static unsafe TValue* Create<TValue>(TValue value) where TValue : unmanaged
         {
             var size = Unsafe.SizeOf<TValue>();
-            var dst = (TValue*) NativeMemory.Alloc(new UIntPtr((uint) size));
+            var dst = (TValue*) Allocator.Alloc(new UIntPtr((uint) size), true);
             MemoryMarshal.Write(new Span<byte>(dst, size), ref value);
             return dst;
         }

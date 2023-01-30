@@ -7,7 +7,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <VersionOverride>0</VersionOverride>
     <Version>1.0.$(VersionOverride)</Version>
-    <DefineConstants>$(DefineConstants);BUTR_NATIVEAOT_ENABLE_WARNING;</DefineConstants>
+    <DefineConstants>$(DefineConstants);BUTR_NATIVEAOT_ENABLE_WARNING;TRACK_ALLOCATIONS;</DefineConstants>
   </PropertyGroup>
 
   <!--NuGet Package-->
@@ -37,6 +37,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Condition="$(DefineConstants.Contains('TRACK_ALLOCATIONS'))" Include="ConcurrentHashSet" Version="1.3.0" />
     <PackageReference Include="NuGetizer" Version="0.9.1" />
   </ItemGroup>
   <ItemGroup>

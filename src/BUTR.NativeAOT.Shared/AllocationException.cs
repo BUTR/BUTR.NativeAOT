@@ -29,37 +29,11 @@
 
 namespace BUTR.NativeAOT.Shared
 {
-    using global::Microsoft.Win32.SafeHandles;
     using global::System;
-    using global::System.Runtime.InteropServices;
 
-    internal sealed unsafe class SafeStringMallocHandle : SafeHandleZeroOrMinusOneIsInvalid
+    public class AllocationException : Exception
     {
-        public static implicit operator ReadOnlySpan<char>(SafeStringMallocHandle handle) =>
-            MemoryMarshal.CreateReadOnlySpanFromNullTerminated((char*) handle.handle.ToPointer());
-
-        private readonly bool _isExternal;
-        
-        public SafeStringMallocHandle() : base(true) { }
-        public SafeStringMallocHandle(char* ptr, bool isExternal) : base(true)
-        {
-            handle = new IntPtr(ptr);
-            _isExternal = isExternal;
-            if (isExternal)
-            {
-                var b = false;
-                DangerousAddRef(ref b);
-            }
-        }
-
-        protected override bool ReleaseHandle()
-        {
-            if (handle != IntPtr.Zero)
-                Allocator.Free(handle.ToPointer(), !_isExternal);
-            return true;
-        }
-
-        public ReadOnlySpan<char> ToSpan() => this;
+        public AllocationException(string message) : base(message) { }
     }
 }
 #nullable restore
