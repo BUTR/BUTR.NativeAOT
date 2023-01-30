@@ -114,7 +114,7 @@ namespace BUTR.NativeAOT.Shared
             var ptr = (return_value_bool*) Value;
             if (ptr->Error is null)
             {
-                return ptr->Value;
+                return ptr->Value == 1;
             }
 
             using var hError = new SafeStringMallocHandle(ptr->Error);

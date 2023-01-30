@@ -138,12 +138,11 @@ namespace BUTR.NativeAOT.Shared
         public static return_value_bool* AsError(char* error) => Utils.Create(new return_value_bool(false, error));
 
         public readonly char* Error;
-        [MarshalAs(UnmanagedType.U1)]
-        public readonly bool Value;
+        public readonly byte Value;
 
         private return_value_bool(bool value, char* error)
         {
-            Value = value;
+            Value = (byte) (value ? 1 : 0);
             Error = error;
         }
     }
