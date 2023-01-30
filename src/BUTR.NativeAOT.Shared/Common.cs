@@ -51,19 +51,23 @@ namespace BUTR.NativeAOT.Shared
     {
         static abstract TSelf* AsError(char* error, bool isOwner);
     }
-    public unsafe interface IReturnValueWithErrorWithValue<TSelf, in TValue> : IReturnValueWithError<TSelf>
+    public unsafe interface IReturnValueWithException<TSelf> : IReturnValueWithError<TSelf> where TSelf : unmanaged, IReturnValueWithException<TSelf>
+    {
+        static TSelf* AsException(Exception e, bool isOwner) => TSelf.AsError(Utils.Copy(e.ToString(), isOwner), isOwner);
+    }
+    public unsafe interface IReturnValueWithErrorWithValue<TSelf, in TValue> : IReturnValueWithException<TSelf>
         where TSelf : unmanaged, IReturnValueWithErrorWithValue<TSelf, TValue>
         where TValue : unmanaged
     {
         static abstract TSelf* AsValue(TValue value, bool isOwner);
     }
-    public unsafe interface IReturnValueWithErrorWithValuePtr<TSelf, TValue> : IReturnValueWithError<TSelf>
+    public unsafe interface IReturnValueWithErrorWithValuePtr<TSelf, TValue> : IReturnValueWithException<TSelf>
         where TSelf : unmanaged, IReturnValueWithErrorWithValuePtr<TSelf, TValue>
         where TValue : unmanaged
     {
         static abstract TSelf* AsValue(TValue* value, bool isOwner);
     }
-    public unsafe interface IReturnValueWithErrorWithValuePtr<TSelf> : IReturnValueWithError<TSelf>
+    public unsafe interface IReturnValueWithErrorWithValuePtr<TSelf> : IReturnValueWithException<TSelf>
         where TSelf : unmanaged, IReturnValueWithErrorWithValuePtr<TSelf>
     {
         static abstract TSelf* AsValue(void* value, bool isOwner);
@@ -155,7 +159,7 @@ namespace BUTR.NativeAOT.Shared
 
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_void : IReturnValueWithError<return_value_void>
+    public readonly unsafe struct return_value_void : IReturnValueWithException<return_value_void>
     {
         public static return_value_void* AsValue(bool isOwner) => Utils.Create(new return_value_void(null), isOwner);
         public static return_value_void* AsError(char* error, bool isOwner) => Utils.Create(new return_value_void(error), isOwner);
