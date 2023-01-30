@@ -62,14 +62,16 @@ namespace BUTR.NativeAOT.Shared
     }
     
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct param_ptr : IParameter<param_ptr>
+    public readonly unsafe struct param_ptr : IParameter<param_ptr>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> ToSpan(param_ptr* ptr) => new IntPtr(ptr).ToString();
+        public static ReadOnlySpan<char> ToSpan(param_ptr* ptr) => new IntPtr(ptr->Value).ToString();
+        
+        public readonly void* Value;
     }
     
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct param_bool : IParameter<param_bool>
+    public readonly unsafe struct param_bool : IParameter<param_bool>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> ToSpan(param_bool* ptr) => ptr->Value.ToString();
@@ -78,7 +80,7 @@ namespace BUTR.NativeAOT.Shared
     }
     
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct param_int : IParameter<param_int>
+    public readonly unsafe struct param_int : IParameter<param_int>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> ToSpan(param_int* ptr) => ptr->Value.ToString();
@@ -87,7 +89,7 @@ namespace BUTR.NativeAOT.Shared
     }    
     
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct param_uint : IParameter<param_uint>
+    public readonly unsafe struct param_uint : IParameter<param_uint>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> ToSpan(param_uint* ptr) => ptr->Value.ToString();
@@ -96,17 +98,21 @@ namespace BUTR.NativeAOT.Shared
     }
     
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct param_string : IParameter<param_string>
+    public readonly unsafe struct param_string : IParameter<param_string>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> ToSpan(param_string* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated((char*) ptr);
+        public static ReadOnlySpan<char> ToSpan(param_string* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Value);
+        
+        public readonly char* Value;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct param_json : IParameter<param_json>
+    public readonly unsafe struct param_json : IParameter<param_json>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> ToSpan(param_json* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated((char*) ptr);
+        public static ReadOnlySpan<char> ToSpan(param_json* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Value);
+        
+        public readonly char* Value;
     }
 
 
