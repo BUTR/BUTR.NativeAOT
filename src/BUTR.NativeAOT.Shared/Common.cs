@@ -86,36 +86,48 @@ namespace BUTR.NativeAOT.Shared
     public readonly unsafe struct param_bool : IParameter<param_bool>, IParameterWithSpan<param_bool>
     {
         public static implicit operator param_bool*(param_bool value) => &value;
+        public static implicit operator param_bool(bool value) => new(value);
         public static implicit operator bool(param_bool ptr) => ptr.Value == 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> ToSpan(param_bool* ptr) => ptr->Value.ToString();
 
         public readonly byte Value;
+
+        public param_bool() { }
+        private param_bool(bool value) => Value = (byte) (value ? 1 : 0);
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct param_int : IParameter<param_int>, IParameterWithSpan<param_int>
     {
         public static implicit operator param_int*(param_int value) => &value;
+        public static implicit operator param_int(int value) => new(value);
         public static implicit operator int(param_int ptr) => ptr.Value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> ToSpan(param_int* ptr) => ptr->Value.ToString();
 
         public readonly int Value;
+        
+        public param_int() { }
+        private param_int(int value) => Value = value;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct param_uint : IParameter<param_uint>, IParameterWithSpan<param_uint>
     {
         public static implicit operator param_uint*(param_uint value) => &value;
+        public static implicit operator param_uint(uint value) => new(value);
         public static implicit operator uint(param_uint ptr) => ptr.Value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> ToSpan(param_uint* ptr) => ptr->Value.ToString();
 
         public readonly uint Value;
+        
+        public param_uint() { }
+        private param_uint(uint value) => Value = value;
     }
 
     [StructLayout(LayoutKind.Sequential)]
