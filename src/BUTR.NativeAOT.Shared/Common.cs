@@ -38,7 +38,7 @@ namespace BUTR.NativeAOT.Shared
     {
         static abstract ReadOnlySpan<char> ToSpan(TSelf* ptr);
     }
-    
+
     public unsafe interface IReturnValueWithError<TSelf> where TSelf : unmanaged, IReturnValueWithError<TSelf>
     {
         static abstract TSelf* AsError(char* error);
@@ -60,59 +60,95 @@ namespace BUTR.NativeAOT.Shared
     {
         static abstract TSelf* AsValue(void* value);
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct param_ptr : IParameter<param_ptr>
     {
+        public static implicit operator param_ptr(void* ptr) => new(ptr);
+        public static implicit operator void*(param_ptr ptr) => ptr.Value;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> ToSpan(param_ptr* ptr) => new IntPtr(ptr->Value).ToString();
-        
+
         public readonly void* Value;
+
+        public param_ptr() { }
+        public param_ptr(void* value) => Value = value;
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct param_bool : IParameter<param_bool>
     {
+        public static implicit operator param_bool(bool value) => new((byte) (value ? 1 : 0));
+        public static implicit operator bool(param_bool ptr) => ptr.Value == 1;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> ToSpan(param_bool* ptr) => ptr->Value.ToString();
 
         public readonly byte Value;
+
+        public param_bool() { }
+        public param_bool(byte value) => Value = value;
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct param_int : IParameter<param_int>
     {
+        public static implicit operator param_int(int value) => new(value);
+        public static implicit operator int(param_int ptr) => ptr.Value;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> ToSpan(param_int* ptr) => ptr->Value.ToString();
-        
+
         public readonly int Value;
-    }    
-    
+
+        public param_int() { }
+        public param_int(int value) => Value = value;
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct param_uint : IParameter<param_uint>
     {
+        public static implicit operator param_uint(uint value) => new(value);
+        public static implicit operator uint(param_uint ptr) => ptr.Value;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> ToSpan(param_uint* ptr) => ptr->Value.ToString();
-        
+
         public readonly uint Value;
+
+        public param_uint() { }
+        public param_uint(uint value) => Value = value;
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct param_string : IParameter<param_string>
     {
+        public static implicit operator param_string(char* value) => new(value);
+        public static implicit operator char*(param_string ptr) => ptr.Value;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> ToSpan(param_string* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Value);
-        
+
         public readonly char* Value;
+
+        public param_string() { }
+        public param_string(char* value) => Value = value;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct param_json : IParameter<param_json>
     {
+        public static implicit operator param_json(char* value) => new(value);
+        public static implicit operator char*(param_json ptr) => ptr.Value;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> ToSpan(param_json* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Value);
-        
+
         public readonly char* Value;
+
+        public param_json() { }
+        public param_json(char* value) => Value = value;
     }
 
 
@@ -149,8 +185,7 @@ namespace BUTR.NativeAOT.Shared
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct return_value_json : IReturnValueWithErrorWithValuePtr<return_value_json, char>
     {
-        public static return_value_json* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) =>
-            AsValue(Utils.SerializeJsonCopy<TValue>(value, jsonTypeInfo));
+        public static return_value_json* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => AsValue(Utils.SerializeJsonCopy(value, jsonTypeInfo));
         public static return_value_json* AsValue(char* value) => Utils.Create(new return_value_json(value, null));
         public static return_value_json* AsError(char* error) => Utils.Create(new return_value_json(null, error));
 

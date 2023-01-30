@@ -29,17 +29,17 @@
 
 namespace BUTR.NativeAOT.Shared
 {
+    using global::Microsoft.Win32.SafeHandles;
     using global::System;
     using global::System.Runtime.InteropServices;
-    using global::Microsoft.Win32.SafeHandles;
 
     internal unsafe class SafeStringMallocHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         public static implicit operator ReadOnlySpan<char>(SafeStringMallocHandle handle) =>
             MemoryMarshal.CreateReadOnlySpanFromNullTerminated((char*) handle.handle.ToPointer());
 
-        public SafeStringMallocHandle(): base(true) { }
-        public SafeStringMallocHandle(char* ptr): base(true)
+        public SafeStringMallocHandle() : base(true) { }
+        public SafeStringMallocHandle(char* ptr) : base(true)
         {
             handle = new IntPtr(ptr);
             var b = false;
@@ -52,7 +52,7 @@ namespace BUTR.NativeAOT.Shared
                 NativeMemory.Free(handle.ToPointer());
             return true;
         }
-        
+
         public ReadOnlySpan<char> ToSpan() => this;
     }
 }

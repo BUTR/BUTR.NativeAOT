@@ -29,15 +29,15 @@
 
 namespace BUTR.NativeAOT.Shared
 {
+    using global::Microsoft.Win32.SafeHandles;
     using global::System;
     using global::System.Runtime.InteropServices;
-    using global::Microsoft.Win32.SafeHandles;
 
     internal unsafe class SafeStructMallocHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         public static SafeStructMallocHandle<TStruct> Create<TStruct>(TStruct* ptr) where TStruct : unmanaged => new(ptr);
 
-        protected SafeStructMallocHandle(): base(true) { }
+        protected SafeStructMallocHandle() : base(true) { }
         protected SafeStructMallocHandle(IntPtr handle) : base(true)
         {
             this.handle = handle;
@@ -166,8 +166,8 @@ namespace BUTR.NativeAOT.Shared
             throw new NativeCallException(new string(hError));
         }
 
-        public SafeStructMallocHandle(): base(IntPtr.Zero) { }
-        public SafeStructMallocHandle(TStruct* param): base(new IntPtr(param)) { }
+        public SafeStructMallocHandle() : base(IntPtr.Zero) { }
+        public SafeStructMallocHandle(TStruct* param) : base(new IntPtr(param)) { }
     }
 }
 #nullable restore
