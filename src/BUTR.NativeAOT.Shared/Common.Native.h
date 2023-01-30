@@ -23,6 +23,8 @@
 #ifndef SRC_COMMON_BINDINGS_H_
 #define SRC_COMMON_BINDINGS_H_
 
+#define CALL_CONV __cdecl
+
 #ifdef __cplusplus
 #include <memory>
 #include <string>
@@ -87,8 +89,9 @@ namespace Common
             param_ptr *const value;
         } return_value_ptr;
 
-        void *const __cdecl alloc(const size_t size);
-        void __cdecl dealloc(const param_ptr *const ptr);
+        void *const CALL_CONV alloc(const size_t size);
+        void CALL_CONV dealloc(const param_ptr *const ptr);
+        unsigned int CALL_CONV alloc_alive_count();
 
 #ifdef __cplusplus
     }
@@ -149,5 +152,7 @@ namespace Common
 
 }
 #endif
+
+#undef CALL_CONV
 
 #endif
