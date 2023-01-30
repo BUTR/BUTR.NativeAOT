@@ -93,7 +93,7 @@ namespace BUTR.NativeAOT.Shared
         public static unsafe SafeStructMallocHandle<TValue> Create<TValue>(TValue value, bool isOwner) where TValue : unmanaged
         {
             var size = Unsafe.SizeOf<TValue>();
-            var dst = (TValue*) Allocator.Alloc(new UIntPtr((uint) size), !isOwner);
+            var dst = (TValue*) Allocator.Alloc(new UIntPtr((uint) size), isOwner);
             MemoryMarshal.Write(new Span<byte>(dst, size), ref value);
             return SafeStructMallocHandle.Create(dst, isOwner);
         }
