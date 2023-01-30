@@ -31,20 +31,19 @@ namespace BUTR.NativeAOT.Shared
 {
     using global::Microsoft.Win32.SafeHandles;
     using global::System;
-    using global::System.Runtime.InteropServices;
 
     internal unsafe class SafeStructMallocHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public static SafeStructMallocHandle<TStruct> Create<TStruct>(TStruct* ptr, bool isExternal) where TStruct : unmanaged => new(ptr, isExternal);
+        public static SafeStructMallocHandle<TStruct> Create<TStruct>(TStruct* ptr, bool isOwner) where TStruct : unmanaged => new(ptr, isOwner);
 
-        protected readonly bool IsExternal;
+        public readonly bool IsOwner;
         
         protected SafeStructMallocHandle() : base(true) { }
-        protected SafeStructMallocHandle(IntPtr handle, bool isExternal) : base(true)
+        protected SafeStructMallocHandle(IntPtr handle, bool isOwner) : base(true)
         {
             this.handle = handle;
-            IsExternal = isExternal;
-            if (isExternal)
+            IsOwner = isOwner;
+            if (!isOwner)
             {
                 var b = false;
                 DangerousAddRef(ref b);
@@ -54,7 +53,7 @@ namespace BUTR.NativeAOT.Shared
         protected override bool ReleaseHandle()
         {
             if (handle != IntPtr.Zero)
-                Allocator.Free(handle.ToPointer(), !IsExternal);
+                Allocator.Free(handle.ToPointer(), IsOwner);
             return true;
         }
     }
@@ -78,7 +77,7 @@ namespace BUTR.NativeAOT.Shared
                 return;
             }
 
-            using var hError = new SafeStringMallocHandle(ptr->Error, IsExternal);
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
             throw new NativeCallException(new string(hError));
         }
 
@@ -90,10 +89,10 @@ namespace BUTR.NativeAOT.Shared
             var ptr = (return_value_string*) Value;
             if (ptr->Error is null)
             {
-                return new SafeStringMallocHandle(ptr->Value, IsExternal);
+                return new SafeStringMallocHandle(ptr->Value, IsOwner);
             }
 
-            using var hError = new SafeStringMallocHandle(ptr->Error, IsExternal);
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
             throw new NativeCallException(new string(hError));
         }
 
@@ -105,10 +104,10 @@ namespace BUTR.NativeAOT.Shared
             var ptr = (return_value_json*) Value;
             if (ptr->Error is null)
             {
-                return new SafeStringMallocHandle(ptr->Value, IsExternal);
+                return new SafeStringMallocHandle(ptr->Value, IsOwner);
             }
 
-            using var hError = new SafeStringMallocHandle(ptr->Error, IsExternal);
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
             throw new NativeCallException(new string(hError));
         }
 
@@ -123,7 +122,7 @@ namespace BUTR.NativeAOT.Shared
                 return ptr->Value == 1;
             }
 
-            using var hError = new SafeStringMallocHandle(ptr->Error, IsExternal);
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
             throw new NativeCallException(new string(hError));
         }
 
@@ -138,7 +137,7 @@ namespace BUTR.NativeAOT.Shared
                 return ptr->Value;
             }
 
-            using var hError = new SafeStringMallocHandle(ptr->Error, IsExternal);
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
             throw new NativeCallException(new string(hError));
         }
 
@@ -153,7 +152,7 @@ namespace BUTR.NativeAOT.Shared
                 return ptr->Value;
             }
 
-            using var hError = new SafeStringMallocHandle(ptr->Error, IsExternal);
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
             throw new NativeCallException(new string(hError));
         }
 
@@ -168,12 +167,12 @@ namespace BUTR.NativeAOT.Shared
                 return ptr->Value;
             }
 
-            using var hError = new SafeStringMallocHandle(ptr->Error, IsExternal);
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
             throw new NativeCallException(new string(hError));
         }
 
         public SafeStructMallocHandle() : base(IntPtr.Zero, false) { }
-        public SafeStructMallocHandle(TStruct* param, bool isExternal) : base(new IntPtr(param), isExternal) { }
+        public SafeStructMallocHandle(TStruct* param, bool isOwner) : base(new IntPtr(param), isOwner) { }
     }
 }
 #nullable restore

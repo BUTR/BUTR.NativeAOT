@@ -41,14 +41,14 @@ namespace BUTR.NativeAOT.Shared
         public static implicit operator ReadOnlySpan<char>(SafeStringMallocHandle handle) =>
             MemoryMarshal.CreateReadOnlySpanFromNullTerminated((char*) handle.handle.ToPointer());
 
-        private readonly bool _isExternal;
+        public readonly bool IsOwner;
         
         public SafeStringMallocHandle() : base(true) { }
-        public SafeStringMallocHandle(char* ptr, bool isExternal) : base(true)
+        public SafeStringMallocHandle(char* ptr, bool isOwner) : base(true)
         {
             handle = new IntPtr(ptr);
-            _isExternal = isExternal;
-            if (isExternal)
+            IsOwner = isOwner;
+            if (!isOwner)
             {
                 var b = false;
                 DangerousAddRef(ref b);
@@ -58,7 +58,7 @@ namespace BUTR.NativeAOT.Shared
         protected override bool ReleaseHandle()
         {
             if (handle != IntPtr.Zero)
-                Allocator.Free(handle.ToPointer(), !_isExternal);
+                Allocator.Free(handle.ToPointer(), IsOwner);
             return true;
         }
 
