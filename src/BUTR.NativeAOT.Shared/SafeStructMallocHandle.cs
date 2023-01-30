@@ -31,6 +31,8 @@ namespace BUTR.NativeAOT.Shared
 {
     using global::Microsoft.Win32.SafeHandles;
     using global::System;
+    using global::System.Runtime.CompilerServices;
+    using global::System.Text.Json.Serialization.Metadata;
 
     internal unsafe class SafeStructMallocHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
@@ -103,6 +105,21 @@ namespace BUTR.NativeAOT.Shared
             if (ptr->Error is null)
             {
                 return new SafeStringMallocHandle(ptr->Value, IsOwner);
+            }
+
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
+            throw new NativeCallException(new string(hError));
+        }
+        public TValue? ValueAsJson<TValue>(JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
+        {
+            if (typeof(TStruct) != typeof(return_value_json))
+                throw new Exception();
+
+            var ptr = (return_value_json*) Value;
+            if (ptr->Error is null)
+            {
+                using var json = new SafeStringMallocHandle(ptr->Value, IsOwner);
+                return Utils.DeserializeJson(json, jsonTypeInfo, caller);
             }
 
             using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
