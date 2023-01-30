@@ -38,7 +38,7 @@ namespace BUTR.NativeAOT.Shared
 #if TRACK_ALLOCATIONS
         private static readonly ConcurrentCollections.ConcurrentHashSet<IntPtr> _pointers = new();
 
-        private static int GetCurrentAllocations(void* ptr) => _pointers.Count;
+        public static int GetCurrentAllocations(void* ptr) => _pointers.Count;
         
         [Conditional("TRACK_ALLOCATIONS")]
         private static void TrackAllocation(void* ptr)
