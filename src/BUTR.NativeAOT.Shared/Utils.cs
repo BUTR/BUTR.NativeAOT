@@ -38,8 +38,7 @@ namespace BUTR.NativeAOT.Shared
 
     internal static class Utils
     {
-        public static SafeStringMallocHandle SerializeJsonCopy<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => Copy(JsonSerializer.Serialize(value, jsonTypeInfo));
-        public static unsafe char* SerializeJsonCopyForExternal<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => CopyForExternal(JsonSerializer.Serialize(value, jsonTypeInfo));
+        public static SafeStringMallocHandle SerializeJsonCopy<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) => Copy(SerializeJson(value, jsonTypeInfo), isOwner);
 
         public static string SerializeJson<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => JsonSerializer.Serialize(value, jsonTypeInfo);
 
@@ -51,7 +50,7 @@ namespace BUTR.NativeAOT.Shared
                 throw new JsonDeserializationException($"Received null parameter! Caller: {caller}, Type: {typeof(TValue)};");
             }
 
-            return DeserializeJson((ReadOnlySpan<char>) json, jsonTypeInfo, caller);
+            return DeserializeJson(json.ToSpan(), jsonTypeInfo, caller);
         }
 
         public static unsafe TValue DeserializeJson<TValue>(param_json* json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
@@ -82,23 +81,21 @@ namespace BUTR.NativeAOT.Shared
         }
 
 
-        public static unsafe char* CopyForExternal(in ReadOnlySpan<char> str)
+        public static unsafe SafeStringMallocHandle Copy(in ReadOnlySpan<char> str, bool isOwner)
         {
             var size = (uint) ((str.Length + 1) * 2);
-
             var dst = (char*) Allocator.Alloc(new UIntPtr(size), true);
             str.CopyTo(new Span<char>(dst, str.Length));
             dst[str.Length] = '\0';
-            return dst;
+            return new(dst, isOwner);
         }
-        public static unsafe SafeStringMallocHandle Copy(in ReadOnlySpan<char> str) => new(CopyForExternal(in str), false);
 
-        public static unsafe TValue* Create<TValue>(TValue value, bool asExternal) where TValue : unmanaged
+        public static unsafe SafeStructMallocHandle<TValue> Create<TValue>(TValue value, bool isOwner) where TValue : unmanaged
         {
             var size = Unsafe.SizeOf<TValue>();
-            var dst = (TValue*) Allocator.Alloc(new UIntPtr((uint) size), !asExternal);
+            var dst = (TValue*) Allocator.Alloc(new UIntPtr((uint) size), !isOwner);
             MemoryMarshal.Write(new Span<byte>(dst, size), ref value);
-            return dst;
+            return SafeStructMallocHandle.Create(dst, isOwner);
         }
     }
 }

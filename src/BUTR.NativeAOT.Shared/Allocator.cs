@@ -69,20 +69,20 @@ namespace BUTR.NativeAOT.Shared
             _dealloc = dealloc;
         }
         
-        public static void* Alloc(nuint byteCount, bool isOwning)
+        public static void* Alloc(nuint byteCount, bool isOwner)
         {
             var ptr = _alloc(byteCount);
 #if TRACK_ALLOCATIONS
-            if (isOwning)
+            if (isOwner)
                 TrackAllocation(ptr);
 #endif
             return ptr;
         }
 
-        public static void Free(void* ptr, bool isOwning)
+        public static void Free(void* ptr, bool isOwner)
         {
 #if TRACK_ALLOCATIONS
-            if (isOwning)
+            if (isOwner)
                 TrackDeallocation(ptr);
 #endif
             _dealloc(ptr);

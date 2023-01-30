@@ -39,15 +39,10 @@ namespace BUTR.NativeAOT.Shared
         public readonly bool IsOwner;
         
         protected SafeStructMallocHandle() : base(true) { }
-        protected SafeStructMallocHandle(IntPtr handle, bool isOwner) : base(true)
+        protected SafeStructMallocHandle(IntPtr handle, bool isOwner) : base(isOwner)
         {
             this.handle = handle;
             IsOwner = isOwner;
-            if (!isOwner)
-            {
-                var b = false;
-                DangerousAddRef(ref b);
-            }
         }
 
         protected override bool ReleaseHandle()
@@ -65,6 +60,9 @@ namespace BUTR.NativeAOT.Shared
         public TStruct* Value => this;
 
         public bool IsNull => Value == null;
+        
+        public SafeStructMallocHandle() : base() { }
+        public SafeStructMallocHandle(TStruct* param, bool isOwner) : base(new IntPtr(param), isOwner) { }
 
         public void ValueAsVoid()
         {
@@ -170,9 +168,6 @@ namespace BUTR.NativeAOT.Shared
             using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
             throw new NativeCallException(new string(hError));
         }
-
-        public SafeStructMallocHandle() : base(IntPtr.Zero, false) { }
-        public SafeStructMallocHandle(TStruct* param, bool isOwner) : base(new IntPtr(param), isOwner) { }
     }
 }
 #nullable restore
