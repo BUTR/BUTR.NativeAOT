@@ -55,20 +55,19 @@ namespace BUTR.NativeAOT.Shared
     {
         static TSelf* AsException(Exception e, bool isOwner) => TSelf.AsError(Utils.Copy(e.ToString(), isOwner), isOwner);
     }
-    public unsafe interface IReturnValueWithErrorWithValue<TSelf, in TValue> : IReturnValueWithException<TSelf>
-        where TSelf : unmanaged, IReturnValueWithErrorWithValue<TSelf, TValue>
-        where TValue : unmanaged
+    public unsafe interface IReturnValueWithExceptionWithValue<TSelf, in TValue> : IReturnValueWithException<TSelf>
+        where TSelf : unmanaged, IReturnValueWithExceptionWithValue<TSelf, TValue>
     {
         static abstract TSelf* AsValue(TValue value, bool isOwner);
     }
-    public unsafe interface IReturnValueWithErrorWithValuePtr<TSelf, TValue> : IReturnValueWithException<TSelf>
-        where TSelf : unmanaged, IReturnValueWithErrorWithValuePtr<TSelf, TValue>
+    public unsafe interface IReturnValueWithExceptionWithValuePtr<TSelf, TValue> : IReturnValueWithException<TSelf>
+        where TSelf : unmanaged, IReturnValueWithExceptionWithValuePtr<TSelf, TValue>
         where TValue : unmanaged
     {
         static abstract TSelf* AsValue(TValue* value, bool isOwner);
     }
-    public unsafe interface IReturnValueWithErrorWithValuePtr<TSelf> : IReturnValueWithException<TSelf>
-        where TSelf : unmanaged, IReturnValueWithErrorWithValuePtr<TSelf>
+    public unsafe interface IReturnValueWithExceptionWithValuePtr<TSelf> : IReturnValueWithException<TSelf>
+        where TSelf : unmanaged, IReturnValueWithExceptionWithValuePtr<TSelf>
     {
         static abstract TSelf* AsValue(void* value, bool isOwner);
     }
@@ -173,8 +172,9 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_string : IReturnValueWithErrorWithValuePtr<return_value_string, char>
+    public readonly unsafe struct return_value_string : IReturnValueWithExceptionWithValuePtr<return_value_string, char>, IReturnValueWithExceptionWithValue<return_value_string, string>
     {
+        public static return_value_string* AsValue(string value, bool isOwner) => Utils.Create(new return_value_string(Utils.Copy(value, isOwner), null), isOwner);
         public static return_value_string* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_string(value, null), isOwner);
         public static return_value_string* AsError(char* error, bool isOwner) => Utils.Create(new return_value_string(null, error), isOwner);
 
@@ -189,11 +189,11 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_json : IReturnValueWithErrorWithValuePtr<return_value_json, char>
+    public readonly unsafe struct return_value_json<TValue> : IReturnValueWithExceptionWithValuePtr<return_value_json<TValue>, char>
     {
-        public static return_value_json* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) => AsValue(Utils.SerializeJsonCopy(value, jsonTypeInfo, isOwner), isOwner);
-        public static return_value_json* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_json(value, null), isOwner);
-        public static return_value_json* AsError(char* error, bool isOwner) => Utils.Create(new return_value_json(null, error), isOwner);
+        public static return_value_json<TValue>* AsValue(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) => AsValue(Utils.SerializeJsonCopy(value, jsonTypeInfo, isOwner), isOwner);
+        public static return_value_json<TValue>* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_json<TValue>(value, null), isOwner);
+        public static return_value_json<TValue>* AsError(char* error, bool isOwner) => Utils.Create(new return_value_json<TValue>(null, error), isOwner);
 
         public readonly char* Error;
         public readonly char* Value;
@@ -206,7 +206,7 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_bool : IReturnValueWithErrorWithValue<return_value_bool, bool>
+    public readonly unsafe struct return_value_bool : IReturnValueWithExceptionWithValue<return_value_bool, bool>
     {
         public static return_value_bool* AsValue(bool value, bool isOwner) => Utils.Create(new return_value_bool(value, null), isOwner);
         public static return_value_bool* AsError(char* error, bool isOwner) => Utils.Create(new return_value_bool(false, error), isOwner);
@@ -222,7 +222,7 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_int32 : IReturnValueWithErrorWithValue<return_value_int32, int>
+    public readonly unsafe struct return_value_int32 : IReturnValueWithExceptionWithValue<return_value_int32, int>
     {
         public static return_value_int32* AsValue(int value, bool isOwner) => Utils.Create(new return_value_int32(value, null), isOwner);
         public static return_value_int32* AsError(char* error, bool isOwner) => Utils.Create(new return_value_int32(0, null), isOwner);
@@ -238,7 +238,7 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_uint32 : IReturnValueWithErrorWithValue<return_value_uint32, uint>
+    public readonly unsafe struct return_value_uint32 : IReturnValueWithExceptionWithValue<return_value_uint32, uint>
     {
         public static return_value_uint32* AsValue(uint value, bool isOwner) => Utils.Create(new return_value_uint32(value, null), isOwner);
         public static return_value_uint32* AsError(char* error, bool isOwner) => Utils.Create(new return_value_uint32(0, error), isOwner);
@@ -254,7 +254,7 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_ptr : IReturnValueWithErrorWithValuePtr<return_value_ptr>
+    public readonly unsafe struct return_value_ptr : IReturnValueWithExceptionWithValuePtr<return_value_ptr>
     {
         public static return_value_ptr* AsValue(void* value, bool isOwner) => Utils.Create(new return_value_ptr(value, null), isOwner);
         public static return_value_ptr* AsError(char* error, bool isOwner) => Utils.Create(new return_value_ptr(null, error), isOwner);
