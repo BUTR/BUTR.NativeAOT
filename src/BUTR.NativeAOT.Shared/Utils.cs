@@ -38,7 +38,8 @@ namespace BUTR.NativeAOT.Shared
 
     internal static class Utils
     {
-        public static unsafe char* SerializeJsonCopy<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => Copy(JsonSerializer.Serialize(value, jsonTypeInfo));
+        public static SafeStringMallocHandle SerializeJsonCopy<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => Copy(JsonSerializer.Serialize(value, jsonTypeInfo));
+        public static unsafe char* SerializeJsonCopyForExternal<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => CopyForExternal(JsonSerializer.Serialize(value, jsonTypeInfo));
 
         public static string SerializeJson<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => JsonSerializer.Serialize(value, jsonTypeInfo);
 
@@ -81,7 +82,7 @@ namespace BUTR.NativeAOT.Shared
         }
 
 
-        public static unsafe char* Copy(in ReadOnlySpan<char> str)
+        public static unsafe char* CopyForExternal(in ReadOnlySpan<char> str)
         {
             var size = (uint) ((str.Length + 1) * 2);
 
@@ -90,6 +91,7 @@ namespace BUTR.NativeAOT.Shared
             dst[str.Length] = '\0';
             return dst;
         }
+        public static unsafe SafeStringMallocHandle Copy(in ReadOnlySpan<char> str) => new(CopyForExternal(in str), false);
 
         public static unsafe TValue* Create<TValue>(TValue value) where TValue : unmanaged
         {

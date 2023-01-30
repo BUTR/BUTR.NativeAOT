@@ -188,7 +188,7 @@ namespace BUTR.NativeAOT.Shared
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct return_value_json : IReturnValueWithErrorWithValuePtr<return_value_json, char>
     {
-        public static return_value_json* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => AsValue(Utils.SerializeJsonCopy(value, jsonTypeInfo));
+        public static return_value_json* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => AsValue(Utils.SerializeJsonCopyForExternal(value, jsonTypeInfo));
         public static return_value_json* AsValue(char* value) => Utils.Create(new return_value_json(value, null));
         public static return_value_json* AsError(char* error) => Utils.Create(new return_value_json(null, error));
 
