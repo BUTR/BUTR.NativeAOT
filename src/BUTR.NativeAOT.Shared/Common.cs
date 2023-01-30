@@ -72,7 +72,7 @@ namespace BUTR.NativeAOT.Shared
     public unsafe struct param_bool : IParameter<param_bool>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> ToSpan(param_bool* ptr) => Marshal.ReadByte(new IntPtr(ptr)).ToString();
+        public static ReadOnlySpan<char> ToSpan(param_bool* ptr) => ptr->Value.ToString();
 
         public readonly byte Value;
     }
@@ -81,7 +81,7 @@ namespace BUTR.NativeAOT.Shared
     public unsafe struct param_int : IParameter<param_int>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> ToSpan(param_int* ptr) => Marshal.ReadByte(new IntPtr(ptr)).ToString();
+        public static ReadOnlySpan<char> ToSpan(param_int* ptr) => ptr->Value.ToString();
         
         public readonly int Value;
     }    
@@ -90,7 +90,7 @@ namespace BUTR.NativeAOT.Shared
     public unsafe struct param_uint : IParameter<param_uint>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> ToSpan(param_uint* ptr) => Marshal.ReadByte(new IntPtr(ptr)).ToString();
+        public static ReadOnlySpan<char> ToSpan(param_uint* ptr) => ptr->Value.ToString();
         
         public readonly uint Value;
     }
