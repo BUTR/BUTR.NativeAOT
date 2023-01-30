@@ -157,7 +157,7 @@ namespace BUTR.NativeAOT.Shared
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct return_value_void : IReturnValueWithError<return_value_void>
     {
-        public static return_value_void* AsValue(bool isOwner = true) => Utils.Create(new return_value_void(null), isOwner);
+        public static return_value_void* AsValue(bool isOwner) => Utils.Create(new return_value_void(null), isOwner);
         public static return_value_void* AsError(char* error, bool isOwner) => Utils.Create(new return_value_void(error), isOwner);
 
         public readonly char* Error;
