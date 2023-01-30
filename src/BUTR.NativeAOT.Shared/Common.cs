@@ -53,7 +53,7 @@ namespace BUTR.NativeAOT.Shared
     }
     public unsafe interface IReturnValueWithException<TSelf> : IReturnValueWithError<TSelf> where TSelf : unmanaged, IReturnValueWithException<TSelf>
     {
-        static TSelf* AsException(Exception e, bool isOwner) => TSelf.AsError(Utils.Copy(e.ToString(), isOwner), isOwner);
+        static virtual TSelf* AsException(Exception e, bool isOwner) => TSelf.AsError(Utils.Copy(e.ToString(), isOwner), isOwner);
     }
     public unsafe interface IReturnValueWithExceptionWithValue<TSelf, in TValue> : IReturnValueWithException<TSelf>
         where TSelf : unmanaged, IReturnValueWithExceptionWithValue<TSelf, TValue>
@@ -189,11 +189,11 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_json<TValue> : IReturnValueWithExceptionWithValuePtr<return_value_json<TValue>, char>
+    public readonly unsafe struct return_value_json : IReturnValueWithExceptionWithValuePtr<return_value_json, char>
     {
-        public static return_value_json<TValue>* AsValue(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) => AsValue(Utils.SerializeJsonCopy(value, jsonTypeInfo, isOwner), isOwner);
-        public static return_value_json<TValue>* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_json<TValue>(value, null), isOwner);
-        public static return_value_json<TValue>* AsError(char* error, bool isOwner) => Utils.Create(new return_value_json<TValue>(null, error), isOwner);
+        public static return_value_json* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) => AsValue(Utils.SerializeJsonCopy(value, jsonTypeInfo, isOwner), isOwner);
+        public static return_value_json* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_json(value, null), isOwner);
+        public static return_value_json* AsError(char* error, bool isOwner) => Utils.Create(new return_value_json(null, error), isOwner);
 
         public readonly char* Error;
         public readonly char* Value;

@@ -98,10 +98,10 @@ namespace BUTR.NativeAOT.Shared
 
         public SafeStringMallocHandle ValueAsJson<TValue>()
         {
-            if (typeof(TStruct) != typeof(return_value_json<TValue>))
+            if (typeof(TStruct) != typeof(return_value_json))
                 throw new Exception();
 
-            var ptr = (return_value_json<TValue>*) Value;
+            var ptr = (return_value_json*) Value;
             if (ptr->Error is null)
             {
                 return new SafeStringMallocHandle(ptr->Value, IsOwner);
@@ -112,10 +112,10 @@ namespace BUTR.NativeAOT.Shared
         }
         public TValue? ValueAsJson<TValue>(JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
         {
-            if (typeof(TStruct) != typeof(return_value_json<TValue>))
+            if (typeof(TStruct) != typeof(return_value_json))
                 throw new Exception();
 
-            var ptr = (return_value_json<TValue>*) Value;
+            var ptr = (return_value_json*) Value;
             if (ptr->Error is null)
             {
                 using var json = new SafeStringMallocHandle(ptr->Value, IsOwner);
