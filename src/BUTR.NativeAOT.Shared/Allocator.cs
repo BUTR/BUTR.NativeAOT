@@ -72,15 +72,19 @@ namespace BUTR.NativeAOT.Shared
         public static void* Alloc(nuint byteCount, bool track)
         {
             var ptr = _alloc(byteCount);
+#if TRACK_ALLOCATIONS
             if (track)
                 TrackAllocation(ptr);
+#endif
             return ptr;
         }
 
         public static void Free(void* ptr, bool track)
         {
+#if TRACK_ALLOCATIONS
             if (track)
                 TrackDeallocation(ptr);
+#endif
             _dealloc(ptr);
         }
     }
