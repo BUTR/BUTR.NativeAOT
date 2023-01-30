@@ -74,11 +74,11 @@ namespace BUTR.NativeAOT.Shared
     public readonly unsafe struct param_ptr : IParameter<param_ptr>, IParameterWithSpan<param_ptr>
     {
         public static implicit operator param_ptr*(param_ptr value) => &value;
-        public static implicit operator void*(param_ptr ptr) => ptr.Value;
+        public static implicit operator void*(param_ptr ptr) => &ptr;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> ToSpan(param_ptr* ptr) => new IntPtr(ptr->Value).ToString();
-
+        public static ReadOnlySpan<char> ToSpan(param_ptr* ptr) => new IntPtr(ptr).ToString();
+        
         public readonly void* Value;
     }
 
@@ -134,11 +134,11 @@ namespace BUTR.NativeAOT.Shared
     public readonly unsafe struct param_string : IParameter<param_string>, IParameterWithSpan<param_string>, IParameterPtr<param_string, char>
     {
         public static implicit operator param_string*(param_string value) => &value;
-        public static implicit operator char*(param_string ptr) => ptr.Value;
+        public static implicit operator char*(param_string ptr) => (char*) &ptr;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> ToSpan(param_string* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Value);
-
+        public static ReadOnlySpan<char> ToSpan(param_string* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated((char*) ptr);
+        
         public readonly char* Value;
     }
 
@@ -146,10 +146,10 @@ namespace BUTR.NativeAOT.Shared
     public readonly unsafe struct param_json : IParameter<param_json>, IParameterWithSpan<param_json>, IParameterPtr<param_json, char>
     {
         public static implicit operator param_json*(param_json value) => &value;
-        public static implicit operator char*(param_json ptr) => ptr.Value;
+        public static implicit operator char*(param_json ptr) => (char*) &ptr;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> ToSpan(param_json* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Value);
+        public static ReadOnlySpan<char> ToSpan(param_json* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated((char*) ptr);
 
         public readonly char* Value;
     }
