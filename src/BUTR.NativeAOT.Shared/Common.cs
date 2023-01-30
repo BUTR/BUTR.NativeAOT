@@ -50,24 +50,24 @@ namespace BUTR.NativeAOT.Shared
 
     public unsafe interface IReturnValueWithError<TSelf> where TSelf : unmanaged, IReturnValueWithError<TSelf>
     {
-        static abstract TSelf* AsError(char* error);
+        static abstract TSelf* AsError(char* error, bool asExternal = false);
     }
     public unsafe interface IReturnValueWithErrorWithValue<TSelf, in TValue> : IReturnValueWithError<TSelf>
         where TSelf : unmanaged, IReturnValueWithErrorWithValue<TSelf, TValue>
         where TValue : unmanaged
     {
-        static abstract TSelf* AsValue(TValue value);
+        static abstract TSelf* AsValue(TValue value, bool asExternal = false);
     }
     public unsafe interface IReturnValueWithErrorWithValuePtr<TSelf, TValue> : IReturnValueWithError<TSelf>
         where TSelf : unmanaged, IReturnValueWithErrorWithValuePtr<TSelf, TValue>
         where TValue : unmanaged
     {
-        static abstract TSelf* AsValue(TValue* value);
+        static abstract TSelf* AsValue(TValue* value, bool asExternal = false);
     }
     public unsafe interface IReturnValueWithErrorWithValuePtr<TSelf> : IReturnValueWithError<TSelf>
         where TSelf : unmanaged, IReturnValueWithErrorWithValuePtr<TSelf>
     {
-        static abstract TSelf* AsValue(void* value);
+        static abstract TSelf* AsValue(void* value, bool asExternal = false);
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -158,8 +158,8 @@ namespace BUTR.NativeAOT.Shared
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct return_value_void : IReturnValueWithError<return_value_void>
     {
-        public static return_value_void* AsValue() => Utils.Create(new return_value_void(null));
-        public static return_value_void* AsError(char* error) => Utils.Create(new return_value_void(error));
+        public static return_value_void* AsValue(bool asExternal = false) => Utils.Create(new return_value_void(null), asExternal);
+        public static return_value_void* AsError(char* error, bool asExternal = false) => Utils.Create(new return_value_void(error), asExternal);
 
         public readonly char* Error;
 
@@ -172,8 +172,8 @@ namespace BUTR.NativeAOT.Shared
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct return_value_string : IReturnValueWithErrorWithValuePtr<return_value_string, char>
     {
-        public static return_value_string* AsValue(char* value) => Utils.Create(new return_value_string(value, null));
-        public static return_value_string* AsError(char* error) => Utils.Create(new return_value_string(null, error));
+        public static return_value_string* AsValue(char* value, bool asExternal = false) => Utils.Create(new return_value_string(value, null), asExternal);
+        public static return_value_string* AsError(char* error, bool asExternal = false) => Utils.Create(new return_value_string(null, error), asExternal);
 
         public readonly char* Error;
         public readonly char* Value;
@@ -189,8 +189,8 @@ namespace BUTR.NativeAOT.Shared
     public readonly unsafe struct return_value_json : IReturnValueWithErrorWithValuePtr<return_value_json, char>
     {
         public static return_value_json* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => AsValue(Utils.SerializeJsonCopyForExternal(value, jsonTypeInfo));
-        public static return_value_json* AsValue(char* value) => Utils.Create(new return_value_json(value, null));
-        public static return_value_json* AsError(char* error) => Utils.Create(new return_value_json(null, error));
+        public static return_value_json* AsValue(char* value, bool asExternal = false) => Utils.Create(new return_value_json(value, null), asExternal);
+        public static return_value_json* AsError(char* error, bool asExternal = false) => Utils.Create(new return_value_json(null, error), asExternal);
 
         public readonly char* Error;
         public readonly char* Value;
@@ -205,8 +205,8 @@ namespace BUTR.NativeAOT.Shared
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct return_value_bool : IReturnValueWithErrorWithValue<return_value_bool, bool>
     {
-        public static return_value_bool* AsValue(bool value) => Utils.Create(new return_value_bool(value, null));
-        public static return_value_bool* AsError(char* error) => Utils.Create(new return_value_bool(false, error));
+        public static return_value_bool* AsValue(bool value, bool asExternal = false) => Utils.Create(new return_value_bool(value, null), asExternal);
+        public static return_value_bool* AsError(char* error, bool asExternal = false) => Utils.Create(new return_value_bool(false, error), asExternal);
 
         public readonly char* Error;
         public readonly byte Value;
@@ -221,8 +221,8 @@ namespace BUTR.NativeAOT.Shared
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct return_value_int32 : IReturnValueWithErrorWithValue<return_value_int32, int>
     {
-        public static return_value_int32* AsValue(int value) => Utils.Create(new return_value_int32(value, null));
-        public static return_value_int32* AsError(char* error) => Utils.Create(new return_value_int32(0, null));
+        public static return_value_int32* AsValue(int value, bool asExternal = false) => Utils.Create(new return_value_int32(value, null), asExternal);
+        public static return_value_int32* AsError(char* error, bool asExternal = false) => Utils.Create(new return_value_int32(0, null), asExternal);
 
         public readonly char* Error;
         public readonly int Value;
@@ -237,8 +237,8 @@ namespace BUTR.NativeAOT.Shared
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct return_value_uint32 : IReturnValueWithErrorWithValue<return_value_uint32, uint>
     {
-        public static return_value_uint32* AsValue(uint value) => Utils.Create(new return_value_uint32(value, null));
-        public static return_value_uint32* AsError(char* error) => Utils.Create(new return_value_uint32(0, error));
+        public static return_value_uint32* AsValue(uint value, bool asExternal = false) => Utils.Create(new return_value_uint32(value, null), asExternal);
+        public static return_value_uint32* AsError(char* error, bool asExternal = false) => Utils.Create(new return_value_uint32(0, error), asExternal);
 
         public readonly char* Error;
         public readonly uint Value;
@@ -253,8 +253,8 @@ namespace BUTR.NativeAOT.Shared
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct return_value_ptr : IReturnValueWithErrorWithValuePtr<return_value_ptr>
     {
-        public static return_value_ptr* AsValue(void* value) => Utils.Create(new return_value_ptr(value, null));
-        public static return_value_ptr* AsError(char* error) => Utils.Create(new return_value_ptr(null, error));
+        public static return_value_ptr* AsValue(void* value, bool asExternal = false) => Utils.Create(new return_value_ptr(value, null), asExternal);
+        public static return_value_ptr* AsError(char* error, bool asExternal = false) => Utils.Create(new return_value_ptr(null, error), asExternal);
 
         public readonly char* Error;
         public readonly void* Value;

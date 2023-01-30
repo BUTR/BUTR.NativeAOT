@@ -93,10 +93,10 @@ namespace BUTR.NativeAOT.Shared
         }
         public static unsafe SafeStringMallocHandle Copy(in ReadOnlySpan<char> str) => new(CopyForExternal(in str), false);
 
-        public static unsafe TValue* Create<TValue>(TValue value) where TValue : unmanaged
+        public static unsafe TValue* Create<TValue>(TValue value, bool asExternal) where TValue : unmanaged
         {
             var size = Unsafe.SizeOf<TValue>();
-            var dst = (TValue*) Allocator.Alloc(new UIntPtr((uint) size), true);
+            var dst = (TValue*) Allocator.Alloc(new UIntPtr((uint) size), !asExternal);
             MemoryMarshal.Write(new Span<byte>(dst, size), ref value);
             return dst;
         }
