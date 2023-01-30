@@ -53,7 +53,7 @@ namespace BUTR.NativeAOT.Shared
     }
     public unsafe interface IReturnValueWithException<TSelf> : IReturnValueWithError<TSelf> where TSelf : unmanaged, IReturnValueWithException<TSelf>
     {
-        static virtual TSelf* AsException(Exception e, bool isOwner) => TSelf.AsError(Utils.Copy(e.ToString(), isOwner), isOwner);
+        static abstract TSelf* AsException(Exception e, bool isOwner);
     }
     public unsafe interface IReturnValueWithExceptionWithValue<TSelf, in TValue> : IReturnValueWithException<TSelf>
         where TSelf : unmanaged, IReturnValueWithExceptionWithValue<TSelf, TValue>
@@ -162,6 +162,7 @@ namespace BUTR.NativeAOT.Shared
     {
         public static return_value_void* AsValue(bool isOwner) => Utils.Create(new return_value_void(null), isOwner);
         public static return_value_void* AsError(char* error, bool isOwner) => Utils.Create(new return_value_void(error), isOwner);
+        public static return_value_void* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_void>(e, isOwner);
 
         public readonly char* Error;
 
@@ -177,6 +178,7 @@ namespace BUTR.NativeAOT.Shared
         public static return_value_string* AsValue(string value, bool isOwner) => Utils.Create(new return_value_string(Utils.Copy(value, isOwner), null), isOwner);
         public static return_value_string* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_string(value, null), isOwner);
         public static return_value_string* AsError(char* error, bool isOwner) => Utils.Create(new return_value_string(null, error), isOwner);
+        public static return_value_string* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_string>(e, isOwner);
 
         public readonly char* Error;
         public readonly char* Value;
@@ -194,6 +196,7 @@ namespace BUTR.NativeAOT.Shared
         public static return_value_json* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) => AsValue(Utils.SerializeJsonCopy(value, jsonTypeInfo, isOwner), isOwner);
         public static return_value_json* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_json(value, null), isOwner);
         public static return_value_json* AsError(char* error, bool isOwner) => Utils.Create(new return_value_json(null, error), isOwner);
+        public static return_value_json* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_json>(e, isOwner);
 
         public readonly char* Error;
         public readonly char* Value;
@@ -210,6 +213,7 @@ namespace BUTR.NativeAOT.Shared
     {
         public static return_value_bool* AsValue(bool value, bool isOwner) => Utils.Create(new return_value_bool(value, null), isOwner);
         public static return_value_bool* AsError(char* error, bool isOwner) => Utils.Create(new return_value_bool(false, error), isOwner);
+        public static return_value_bool* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_bool>(e, isOwner);
 
         public readonly char* Error;
         public readonly byte Value;
@@ -226,6 +230,7 @@ namespace BUTR.NativeAOT.Shared
     {
         public static return_value_int32* AsValue(int value, bool isOwner) => Utils.Create(new return_value_int32(value, null), isOwner);
         public static return_value_int32* AsError(char* error, bool isOwner) => Utils.Create(new return_value_int32(0, null), isOwner);
+        public static return_value_int32* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_int32>(e, isOwner);
 
         public readonly char* Error;
         public readonly int Value;
@@ -242,6 +247,7 @@ namespace BUTR.NativeAOT.Shared
     {
         public static return_value_uint32* AsValue(uint value, bool isOwner) => Utils.Create(new return_value_uint32(value, null), isOwner);
         public static return_value_uint32* AsError(char* error, bool isOwner) => Utils.Create(new return_value_uint32(0, error), isOwner);
+        public static return_value_uint32* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_uint32>(e, isOwner);
 
         public readonly char* Error;
         public readonly uint Value;
@@ -258,6 +264,7 @@ namespace BUTR.NativeAOT.Shared
     {
         public static return_value_ptr* AsValue(void* value, bool isOwner) => Utils.Create(new return_value_ptr(value, null), isOwner);
         public static return_value_ptr* AsError(char* error, bool isOwner) => Utils.Create(new return_value_ptr(null, error), isOwner);
+        public static return_value_ptr* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_ptr>(e, isOwner);
 
         public readonly char* Error;
         public readonly void* Value;
