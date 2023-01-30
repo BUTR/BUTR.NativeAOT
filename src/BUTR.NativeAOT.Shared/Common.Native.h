@@ -49,46 +49,46 @@ namespace Common
         typedef unsigned char param_bool;
         typedef signed int param_int;
         typedef unsigned int param_uint;
-        typedef void param_ptr; 
+        typedef void param_ptr;
 #endif
 
         typedef struct return_value_void
         {
-            param_string *error;
+            param_string *const error;
         } return_value_void;
         typedef struct return_value_string
         {
-            param_string *error;
-            param_string *value;
+            param_string *const error;
+            param_string *const value;
         } return_value_string;
         typedef struct return_value_json
         {
-            param_string *error;
-            param_json *value;
+            param_string *const error;
+            param_json *const value;
         } return_value_json;
         typedef struct return_value_bool
         {
-            param_string *error;
-            param_bool value;
+            param_string *const error;
+            param_bool const value;
         } return_value_bool;
         typedef struct return_value_int32
         {
-            param_string *error;
-            param_int value;
+            param_string *const error;
+            param_int const value;
         } return_value_int32;
         typedef struct return_value_uint32
         {
-            param_string *error;
-            param_uint value;
+            param_string *const error;
+            param_uint const value;
         } return_value_uint32;
         typedef struct return_value_ptr
         {
-            param_string *error;
-            param_ptr *value;
+            param_string *const error;
+            param_ptr *const value;
         } return_value_ptr;
 
-        void *__cdecl alloc(size_t size);
-        void __cdecl dealloc(const param_ptr *ptr);
+        void *const __cdecl alloc(const size_t size);
+        void __cdecl dealloc(const param_ptr *const ptr);
 
 #ifdef __cplusplus
     }
@@ -96,7 +96,7 @@ namespace Common
     template <typename T>
     struct deleter
     {
-        void operator()(const T *ptr) const { dealloc(ptr); }
+        void operator()(const T *const ptr) const { dealloc(ptr); }
     };
 
     using del_void = std::unique_ptr<return_value_void, deleter<return_value_void>>;
@@ -107,14 +107,14 @@ namespace Common
     using del_uint32 = std::unique_ptr<return_value_uint32, deleter<return_value_uint32>>;
     using del_ptr = std::unique_ptr<return_value_ptr, deleter<return_value_ptr>>;
 
-    char16_t *Copy(const std::u16string str)
+    char16_t *const Copy(const std::u16string str)
     {
         const auto src = str.c_str();
         const auto srcChar16Length = str.length();
         const auto srcByteLength = srcChar16Length * sizeof(char16_t);
         const auto size = srcByteLength + sizeof(char16_t);
 
-        auto dst = (char16_t *)alloc(size);
+        auto dst = static_cast<char16_t *const>(alloc(size));
         if (dst == nullptr)
         {
             throw std::bad_alloc();
@@ -129,16 +129,16 @@ namespace Common
         return std::unique_ptr<char16_t[], deleter<char16_t>>(Copy(str));
     }
 
-    const char16_t *NoCopy(const std::u16string str) noexcept
+    const char16_t *const NoCopy(const std::u16string str) noexcept
     {
         return str.c_str();
     }
 
     template <typename T>
-    T *Create(const T val)
+    T *const Create(const T val)
     {
-        const auto size = (size_t)sizeof(T);
-        auto dst = (T *)alloc(size);
+        const auto size = sizeof(T);
+        auto dst = static_cast<T *const>(alloc(size));
         if (dst == nullptr)
         {
             throw std::bad_alloc();
