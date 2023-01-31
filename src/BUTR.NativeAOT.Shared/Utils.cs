@@ -87,7 +87,7 @@ namespace BUTR.NativeAOT.Shared
         public static unsafe SafeStringMallocHandle Copy(in ReadOnlySpan<char> str, bool isOwner)
         {
             var size = (uint) ((str.Length + 1) * 2);
-            var dst = (char*) Allocator.Alloc(new UIntPtr(size), true);
+            var dst = (char*) Allocator.Alloc(new UIntPtr(size));
             str.CopyTo(new Span<char>(dst, str.Length));
             dst[str.Length] = '\0';
             return new(dst, isOwner);
@@ -96,7 +96,7 @@ namespace BUTR.NativeAOT.Shared
         public static unsafe SafeStructMallocHandle<TValue> Create<TValue>(TValue value, bool isOwner) where TValue : unmanaged
         {
             var size = Unsafe.SizeOf<TValue>();
-            var dst = (TValue*) Allocator.Alloc(new UIntPtr((uint) size), isOwner);
+            var dst = (TValue*) Allocator.Alloc(new UIntPtr((uint) size));
             MemoryMarshal.Write(new Span<byte>(dst, size), ref value);
             return SafeStructMallocHandle.Create(dst, isOwner);
         }

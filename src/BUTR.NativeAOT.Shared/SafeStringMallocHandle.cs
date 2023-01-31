@@ -51,7 +51,7 @@ namespace BUTR.NativeAOT.Shared
         protected override bool ReleaseHandle()
         {
             if (handle != IntPtr.Zero)
-                Allocator.Free(handle.ToPointer(), IsOwner);
+                Allocator.Free(handle.ToPointer());
             return true;
         }
 
