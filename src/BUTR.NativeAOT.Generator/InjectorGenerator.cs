@@ -103,10 +103,10 @@ public class InjectorGenerator : ISourceGenerator
     private static ConstMetadata IsConst(AttributeData? parentConstAttribute, IParameterSymbol parameter)
     {
         var parameterConstAttribute = parameter.GetAttributes().FirstOrDefault(x => x.AttributeClass is not null &&
-                                                                                    CompareAttributeName(x.AttributeClass, "IsConst") &&
-                                                                                    CompareAttributeName(x.AttributeClass, "IsNotConst") &&
-                                                                                    CompareAttributeName(x.AttributeClass, "IsConst`1") &&
-                                                                                    CompareAttributeName(x.AttributeClass, "IsNotConst`1"));
+                                                                                    (CompareAttributeName(x.AttributeClass, "IsConst") ||
+                                                                                    CompareAttributeName(x.AttributeClass, "IsNotConst") ||
+                                                                                    CompareAttributeName(x.AttributeClass, "IsConst`1") ||
+                                                                                    CompareAttributeName(x.AttributeClass, "IsNotConst`1")));
         var constAttribute = parameterConstAttribute ?? parentConstAttribute;
         
         var root = constAttribute?.AttributeClass;
