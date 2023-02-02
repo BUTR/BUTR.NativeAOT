@@ -5,6 +5,7 @@ using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+
 using Microsoft.CodeAnalysis;
 
 namespace BUTR.NativeAOT.Generator;
@@ -62,7 +63,7 @@ public class InjectorGenerator : ISourceGenerator
 
     private static ConstFlags GetConstRootMetadata(INamedTypeSymbol typeSymbol)
     {
-        if (typeSymbol is { MetadataName: "IsPtrConst" })
+        if (CompareAttributeName(typeSymbol, "IsPtrConst"))
         {
             return new ConstFlags(true, null);
         }
@@ -76,20 +77,20 @@ public class InjectorGenerator : ISourceGenerator
         
         if (constAttribute.AttributeClass?.TypeArguments[idx] is INamedTypeSymbol root)
         {
-            if (root.MetadataName == "IsConst")
+            if (CompareAttributeName(root, "IsConst"))
             {
                 return new ConstMetadata(true, false);
             }
-            if (root.MetadataName == "IsNotConst")
+            if (CompareAttributeName(root, "IsNotConst"))
             {
                 return new ConstMetadata(false, false);
             }
-            if (root.MetadataName == "IsConst`1"&& root.TypeArguments[0] is INamedTypeSymbol innerConstFlag)
+            if (CompareAttributeName(root, "IsConst`1") && root.TypeArguments[0] is INamedTypeSymbol innerConstFlag)
             {
                 var (isPtrConst, _) = GetConstRootMetadata(innerConstFlag);
                 return new ConstMetadata(true, isPtrConst);
             }
-            if (root.MetadataName == "IsNotConst`1"&& root.TypeArguments[0] is INamedTypeSymbol innerNotConstFlag)
+            if (CompareAttributeName(root, "IsNotConst`1") && root.TypeArguments[0] is INamedTypeSymbol innerNotConstFlag)
             {
                 var (isPtrConst, _) = GetConstRootMetadata(innerNotConstFlag);
                 return new ConstMetadata(false, isPtrConst);
@@ -181,14 +182,14 @@ public class InjectorGenerator : ISourceGenerator
         {
             hasPointsToConst = pointsToConstVal1;
         }
-        if (constGenericAttribute?.AttributeClass is not null)
+        if (constGenericAttribute?.AttributeClass?.TypeArguments[0] is INamedTypeSymbol innerConstFlag)
         {
-            var (isPtrConst, _) = GetConstRootMetadata(constGenericAttribute.AttributeClass); 
+            var (isPtrConst, _) = GetConstRootMetadata(innerConstFlag); 
             hasPointsToConst = isPtrConst;
         }
-        if (notConstGenericAttribute?.AttributeClass is not null)
+        if (notConstGenericAttribute?.AttributeClass?.TypeArguments[0] is INamedTypeSymbol innerNonConstFlag)
         {
-            var (isPtrConst, _) = GetConstRootMetadata(notConstGenericAttribute.AttributeClass); 
+            var (isPtrConst, _) = GetConstRootMetadata(innerNonConstFlag); 
             hasPointsToConst = isPtrConst;
         }
 
