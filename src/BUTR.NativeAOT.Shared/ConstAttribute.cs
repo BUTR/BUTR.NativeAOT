@@ -50,6 +50,9 @@ namespace BUTR.NativeAOT.Shared
     
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Method)]
     public class IsConstAttribute<T> : Attribute where T : IConstFlags { }
+    
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Method)]
+    public class IsNotConstAttribute<T> : Attribute where T : IConstFlags { }
 
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.Method)]
     public class ConstMetaAttribute<T1> : Attribute

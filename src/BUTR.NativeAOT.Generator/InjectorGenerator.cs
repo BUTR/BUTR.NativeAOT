@@ -113,6 +113,11 @@ public class InjectorGenerator : ISourceGenerator
                 var (isPtrConst, _) = GetConstRootMetadata(innerConstFlag);
                 return new ConstMetadata(true, isPtrConst);
             }
+            if (root is not null && CompareAttributeName(root, "IsNotConst`1") && root.TypeArguments[0] is INamedTypeSymbol innerNotConstFlag)
+            {
+                var (isPtrConst, _) = GetConstRootMetadata(innerNotConstFlag);
+                return new ConstMetadata(false, isPtrConst);
+            }
         }
         
         if (constAttribute.NamedArguments.FirstOrDefault(x => x.Key == "PointsToConstant") is { Value: { IsNull: false, Value: bool pointsToConstVal } })
@@ -166,7 +171,11 @@ public class InjectorGenerator : ISourceGenerator
         var constReturnTypeGenericAttribute = methodSymbol.ReturnType.GetAttributes().FirstOrDefault(x => x.AttributeClass?.MetadataName.StartsWith("IsConst`1") == true);
         var constGenericAttribute = constReturnTypeGenericAttribute ?? constMethodGenericAttribute;
 
-        var hasConst = constAttribute is not null || constGenericAttribute is not null;
+        var notConstMethodGenericAttribute = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass is not null && CompareAttributeName(x.AttributeClass, "IsNotConst`1"));
+        var notConstReturnTypeGenericAttribute = methodSymbol.ReturnType.GetAttributes().FirstOrDefault(x => x.AttributeClass?.MetadataName.StartsWith("IsNotConst`1") == true);
+        var notConstGenericAttribute = notConstReturnTypeGenericAttribute ?? notConstMethodGenericAttribute;
+        
+        var hasConst = (constAttribute is not null || constGenericAttribute is not null) && notConstGenericAttribute is null;
         var hasPointsToConst = false;
         if (constAttribute?.NamedArguments.FirstOrDefault(x => x.Key == "PointsToConstant") is { Value: { IsNull: false, Value: bool pointsToConstVal1 } })
         {
@@ -175,6 +184,11 @@ public class InjectorGenerator : ISourceGenerator
         if (constGenericAttribute?.AttributeClass is not null)
         {
             var (isPtrConst, _) = GetConstRootMetadata(constGenericAttribute.AttributeClass); 
+            hasPointsToConst = isPtrConst;
+        }
+        if (notConstGenericAttribute?.AttributeClass is not null)
+        {
+            var (isPtrConst, _) = GetConstRootMetadata(notConstGenericAttribute.AttributeClass); 
             hasPointsToConst = isPtrConst;
         }
 
