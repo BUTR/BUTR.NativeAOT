@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		..\.github\workflows\publish-nuget.yml = ..\.github\workflows\publish-nuget.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BUTR.NativeAOT.Generator", "BUTR.NativeAOT.Generator\BUTR.NativeAOT.Generator.csproj", "{13D7F54F-C18F-484C-819B-E38872E9D8A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,10 +29,15 @@ Global
 		{763F8A1F-C5BD-4D29-94BA-4286E52ABB43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{763F8A1F-C5BD-4D29-94BA-4286E52ABB43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{763F8A1F-C5BD-4D29-94BA-4286E52ABB43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13D7F54F-C18F-484C-819B-E38872E9D8A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13D7F54F-C18F-484C-819B-E38872E9D8A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13D7F54F-C18F-484C-819B-E38872E9D8A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13D7F54F-C18F-484C-819B-E38872E9D8A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{763F8A1F-C5BD-4D29-94BA-4286E52ABB43} = {76D279A1-CCF8-4D52-939E-8FC58D02C71A}
 		{76D279A1-CCF8-4D52-939E-8FC58D02C71A} = {78F455AA-4FD5-4C4F-8F26-0EF0720E5CBB}
 		{EDCD708F-0592-46C1-A586-550272BD9E45} = {78F455AA-4FD5-4C4F-8F26-0EF0720E5CBB}
+		{13D7F54F-C18F-484C-819B-E38872E9D8A8} = {76D279A1-CCF8-4D52-939E-8FC58D02C71A}
 	EndGlobalSection
 EndGlobal

@@ -15,8 +15,8 @@
     <Authors>BUTR</Authors>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/BUTR/BUTR.NativeAOT.Shared</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/BUTR/BUTR.NativeAOT.Shared.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/BUTR/BUTR.NativeAOT</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/BUTR/BUTR.NativeAOT.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
@@ -42,10 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageFile Include="**/*.cs" PackagePath="contentFiles\cs\$(TargetFramework)\$(ProjectName)\%(RelativeDir)%(Filename).cs.pp" Exclude="$(BaseIntermediateOutputPath)/**/*.cs" />
-    <PackageFile Include="**/*.h" PackagePath="contentFiles\cpp\any\%(RelativeDir)%(Filename).h" BuildAction="Content" CopyToOutput="true" />
     <PackageFile Include="**/*.props" PackagePath="build\native\%(Filename).props" Exclude="$(BaseIntermediateOutputPath)/**/*.props" />
     <PackageFile Include="**/*.targets" PackagePath="build\native\%(Filename).targets" Exclude="$(BaseIntermediateOutputPath)/**/*.targets" />
-    <PackageFile Include="**/*.h" PackagePath="include\butrnativeaotshared\%(Filename).h" />
   </ItemGroup>
   <!--NuGet Package-->
 

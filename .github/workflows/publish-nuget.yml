@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - '.github/workflows/publish-nuget.yml'
+      - 'src/BUTR.NativeAOT.Generator/**/*'
       - 'src/BUTR.NativeAOT.Shared/**/*'
   workflow_dispatch:
 
@@ -24,6 +25,7 @@ jobs:
           dotnet-version: 7.x.x
 
       - run: dotnet pack -c Release src/BUTR.NativeAOT.Shared -p:VersionOverride=$(git rev-list --no-merges --count master) -o ./packages
+      - run: dotnet pack -c Release src/BUTR.NativeAOT.Generator -p:VersionOverride=$(git rev-list --no-merges --count master) -o ./packages
       
       - name: Push to NuGet
         run: dotnet nuget push "./packages/*.nupkg" -k ${{secrets.NUGET_API_KEY}} -s https://www.nuget.org --skip-duplicate

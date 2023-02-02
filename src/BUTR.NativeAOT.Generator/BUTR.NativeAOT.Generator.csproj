@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <Authors>BUTR</Authors>
+
+    <VersionOverride>0</VersionOverride>
+    <Version>1.0.$(VersionOverride)</Version>
+    
+    <!-- Do not include the generator as a lib dependency -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <RootNamespace>BUTR.NativeAOT.Generator</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>BUTR.NativeAOT.Generator</PackageId>
+    <Title>BUTR.NativeAOT.Generator</Title>
+    <Description>C/C++ header generator for BUTR's NativeAOT projects.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/BUTR/BUTR.NativeAOT</PackageProjectUrl>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <!--
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageIconUrl>https://raw.githubusercontent.com/BUTR/BUTR.NativeAOT/master/assets/Icon128x128.png</PackageIconUrl>
+    -->
+    <PackageTags>butr bannerlord source generator header headers c cpp</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="IsExternalInit" Version="1.0.3" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="buildMultiTargeting\BUTR.NativeAOT.Generator.props" />
+    <None Remove="build\BUTR.NativeAOT.Generator.props" />
+    <Content Include="buildMultiTargeting\BUTR.NativeAOT.Generator.props" PackagePath="%(Identity)" Pack="true" Visible="true" />
+    <Content Include="build\BUTR.NativeAOT.Generator.props" PackagePath="%(Identity)" Pack="true" Visible="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="$(OutputPath)\$(AssemblyName).pdb" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+  
+</Project>
