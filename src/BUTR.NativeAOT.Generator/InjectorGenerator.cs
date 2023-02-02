@@ -73,9 +73,10 @@ public class InjectorGenerator : ISourceGenerator
 
     private static ConstMetadata IsConst(AttributeData? constAttribute, IFunctionPointerTypeSymbol functionPointerTypeSymbol, int idx)
     {
-        if (constAttribute?.AttributeClass is null) return new ConstMetadata(false, false);
+        var rootRoot = constAttribute?.AttributeClass;
+        if (rootRoot is null) return new ConstMetadata(false, false);
         
-        if (constAttribute.AttributeClass?.TypeArguments[idx] is INamedTypeSymbol root)
+        if (rootRoot?.TypeArguments[idx] is INamedTypeSymbol root)
         {
             if (CompareAttributeName(root, "IsConst"))
             {
@@ -101,27 +102,31 @@ public class InjectorGenerator : ISourceGenerator
     }
     private static ConstMetadata IsConst(AttributeData? parentConstAttribute, IParameterSymbol parameter)
     {
-        var parameterConstAttribute = parameter.GetAttributes().FirstOrDefault(x => x.AttributeClass is not null && CompareAttributeName(x.AttributeClass, "IsConst"));
-
+        var parameterConstAttribute = parameter.GetAttributes().FirstOrDefault(x => x.AttributeClass is not null &&
+                                                                                    CompareAttributeName(x.AttributeClass, "IsConst") &&
+                                                                                    CompareAttributeName(x.AttributeClass, "IsNotConst") &&
+                                                                                    CompareAttributeName(x.AttributeClass, "IsConst`1") &&
+                                                                                    CompareAttributeName(x.AttributeClass, "IsNotConst`1"));
         var constAttribute = parameterConstAttribute ?? parentConstAttribute;
-        if (constAttribute?.AttributeClass is null) return new ConstMetadata(false, false);
+        
+        var root = constAttribute?.AttributeClass;
+        if (root is null) return new ConstMetadata(false, false);
 
-        if (constAttribute.AttributeClass.Arity == 1)
+        if (root.Arity == 1 && root?.TypeArguments[0] is INamedTypeSymbol flag)
         {
-            var root = constAttribute.AttributeClass;
-            if (root is not null && CompareAttributeName(root, "IsConst`1") && root.TypeArguments[0] is INamedTypeSymbol innerConstFlag)
+            if (CompareAttributeName(root, "IsConst`1"))
             {
-                var (isPtrConst, _) = GetConstRootMetadata(innerConstFlag);
+                var (isPtrConst, _) = GetConstRootMetadata(flag);
                 return new ConstMetadata(true, isPtrConst);
             }
-            if (root is not null && CompareAttributeName(root, "IsNotConst`1") && root.TypeArguments[0] is INamedTypeSymbol innerNotConstFlag)
+            if (CompareAttributeName(root, "IsNotConst`1"))
             {
-                var (isPtrConst, _) = GetConstRootMetadata(innerNotConstFlag);
+                var (isPtrConst, _) = GetConstRootMetadata(flag);
                 return new ConstMetadata(false, isPtrConst);
             }
         }
         
-        if (constAttribute.NamedArguments.FirstOrDefault(x => x.Key == "PointsToConstant") is { Value: { IsNull: false, Value: bool pointsToConstVal } })
+        if (constAttribute?.NamedArguments.FirstOrDefault(x => x.Key == "PointsToConstant") is { Value: { IsNull: false, Value: bool pointsToConstVal } })
         {
             return new ConstMetadata(true, pointsToConstVal);
         }
