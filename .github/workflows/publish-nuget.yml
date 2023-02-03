@@ -6,8 +6,12 @@ on:
       - master
     paths:
       - '.github/workflows/publish-nuget.yml'
-      - 'src/BUTR.NativeAOT.Generator/**/*'
       - 'src/BUTR.NativeAOT.Shared/**/*'
+      - 'src/BUTR.NativeAOT.Generator/**/*'
+      - 'src/BUTR.NativeAOT.Analyzer.Shared/**/*'
+      - 'src/BUTR.NativeAOT.Analyzer/**/*'
+      - 'src/BUTR.NativeAOT.Analyzer.CodeFixes/**/*'
+      - 'src/BUTR.NativeAOT.Analyzer.Package/**/*'
   workflow_dispatch:
 
 jobs:
@@ -24,8 +28,11 @@ jobs:
         with:
           dotnet-version: 7.x.x
 
-      - run: dotnet pack -c Release src/BUTR.NativeAOT.Shared -p:VersionOverride=$(git rev-list --no-merges --count master) -o ./packages
-      - run: dotnet pack -c Release src/BUTR.NativeAOT.Generator -p:VersionOverride=$(git rev-list --no-merges --count master) -o ./packages
+      - run: dotnet pack -c Release src/BUTR.NativeAOT.Shared -p:VersionOverride=$(git rev-list --no-merges --count master) -o ./packages;
+      - run: dotnet pack -c Release src/BUTR.NativeAOT.Generator -p:VersionOverride=$(git rev-list --no-merges --count master) -o ./packages;
+      - run: |
+          dotnet build -c Release src/BUTR.NativeAOT.Analyzer.Package -p:VersionOverride=$(git rev-list --no-merges --count master);
+          dotnet pack -c Release src/BUTR.NativeAOT.Analyzer.Package -p:VersionOverride=$(git rev-list --no-merges --count master) -o ./packages;
       
       - name: Push to NuGet
         run: dotnet nuget push "./packages/*.nupkg" -k ${{secrets.NUGET_API_KEY}} -s https://www.nuget.org --skip-duplicate
