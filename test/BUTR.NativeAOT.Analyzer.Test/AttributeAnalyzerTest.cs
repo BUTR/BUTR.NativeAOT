@@ -82,7 +82,7 @@ namespace BUTR.NativeAOT.Analyzer.Test
     }}
 }}{CodeBase}").ValidateAsync();
     }
-    
+
     [TestMethod]
     public async Task ReturnType_Test()
     {
@@ -154,7 +154,7 @@ namespace BUTR.NativeAOT.Analyzer.Test
     }}
 }}{CodeBase}").ValidateAsync();
     }
-    
+
     [TestMethod]
     public async Task FunctionalParameter_Test()
     {

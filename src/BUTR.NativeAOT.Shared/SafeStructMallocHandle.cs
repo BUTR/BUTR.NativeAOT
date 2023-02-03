@@ -39,7 +39,7 @@ namespace BUTR.NativeAOT.Shared
         public static SafeStructMallocHandle<TStruct> Create<TStruct>(TStruct* ptr, bool isOwner) where TStruct : unmanaged => new(ptr, isOwner);
 
         public readonly bool IsOwner;
-        
+
         protected SafeStructMallocHandle() : base(true) { }
         protected SafeStructMallocHandle(IntPtr handle, bool isOwner) : base(isOwner)
         {
@@ -62,7 +62,7 @@ namespace BUTR.NativeAOT.Shared
         public TStruct* Value => this;
 
         public bool IsNull => Value == null;
-        
+
         public SafeStructMallocHandle() : base() { }
         public SafeStructMallocHandle(TStruct* param, bool isOwner) : base(new IntPtr(param), isOwner) { }
 

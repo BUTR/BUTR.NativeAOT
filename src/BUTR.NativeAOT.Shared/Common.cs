@@ -36,10 +36,10 @@ namespace BUTR.NativeAOT.Shared
 
     [StructLayout(LayoutKind.Sequential, Size = 0)]
     public struct VoidPtr { }
-    
+
     public unsafe interface IParameter<TSelf> where TSelf : unmanaged, IParameter<TSelf>
     {
-        
+
     }
     public unsafe interface IParameterSpanFormattable<TSelf>
         where TSelf : unmanaged, IParameterSpanFormattable<TSelf>
@@ -71,7 +71,7 @@ namespace BUTR.NativeAOT.Shared
     {
         static abstract TSelf* AsException(Exception e, bool isOwner);
     }
-    
+
     public unsafe interface IReturnValueWithNoValue<TSelf>
         where TSelf : unmanaged, IReturnValueWithNoValue<TSelf>
     {
@@ -138,7 +138,7 @@ namespace BUTR.NativeAOT.Shared
         public static ReadOnlySpan<char> ToSpan(param_int* ptr) => ptr->Value.ToString();
 
         public readonly int Value;
-        
+
         public param_int() { }
         private param_int(int value) => Value = value;
     }
@@ -154,7 +154,7 @@ namespace BUTR.NativeAOT.Shared
         public static ReadOnlySpan<char> ToSpan(param_uint* ptr) => ptr->Value.ToString();
 
         public readonly uint Value;
-        
+
         public param_uint() { }
         private param_uint(uint value) => Value = value;
     }
@@ -171,7 +171,7 @@ namespace BUTR.NativeAOT.Shared
         static IntPtr IParameterIntPtr<param_string>.ToPtr(param_string* ptr) => new(ptr);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static char* ToRawPtr(param_string* ptr) => (char*) ptr;
-        
+
         public readonly char* Value;
     }
 

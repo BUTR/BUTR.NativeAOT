@@ -1,15 +1,14 @@
 ﻿using BUTR.NativeAOT.Analyzer.Shared;
 
-using System.IO;
-using System.Linq;
-using System.Text;
-
 using Microsoft.CodeAnalysis;
 
 using System;
+using System.IO;
+using System.Linq;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace BUTR.NativeAOT.Generator;
 
@@ -25,11 +24,11 @@ public class InjectorGenerator : ISourceGenerator
             case SignatureCallingConvention.FastCall: return "__fastcall";
             case SignatureCallingConvention.ThisCall: return "__thiscall";
         }
-        
+
         //if (method.UnmanagedCallingConventionTypes.Length > 0)
         //{
         //}
-        
+
         var attr = method.GetAttributes().FirstOrDefault(x => x.AttributeClass?.MetadataName.StartsWith("UnmanagedCallersOnly", StringComparison.Ordinal) == true);
         if (attr?.NamedArguments.FirstOrDefault(x => x.Key == "CallConvs") is { Value.IsNull: false } callConvs && callConvs.Value.Values.FirstOrDefault().Value is INamedTypeSymbol typeSymbol)
         {
@@ -42,10 +41,10 @@ public class InjectorGenerator : ISourceGenerator
                 default: return typeSymbol.MetadataName;
             }
         }
-            
+
         return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "__stdcall" : "__cdecl";
     }
-    
+
     private static string GetMethodName(IMethodSymbol method)
     {
         var attr = method.GetAttributes().FirstOrDefault(x => x.AttributeClass?.MetadataName.StartsWith("UnmanagedCallersOnly", StringComparison.Ordinal) == true);
@@ -53,17 +52,17 @@ public class InjectorGenerator : ISourceGenerator
         {
             return entryPoint;
         }
-            
+
         return method.MetadataName;
     }
-    
+
     private static string GetTypeName(ITypeSymbol type, ConstMetadata? constMetadataRaw = null)
     {
         var constMetadata = constMetadataRaw ?? ConstMetadata.Empty;
-        
+
         if (type is IPointerTypeSymbol pointerTypeSymbol)
             return $"{(constMetadata.IsConst ? "const " : string.Empty)}{GetTypeName(pointerTypeSymbol.PointedAtType)}*{(constMetadata.IsPointingToConst ? " const" : string.Empty)}";
-        
+
         switch (type.SpecialType)
         {
             case SpecialType.System_Boolean:
@@ -96,10 +95,10 @@ public class InjectorGenerator : ISourceGenerator
             case SpecialType.System_Void:
                 return "void";
         }
-        
+
         return type.MetadataName;
     }
-    
+
     private static string GetReturnType(IMethodSymbol methodSymbol, ConstMetadata? constMetadataOverride)
     {
         constMetadataOverride ??= Helper.TryGetMethodMetadata(methodSymbol, out var val) ? val : null;
@@ -111,7 +110,7 @@ public class InjectorGenerator : ISourceGenerator
         var constMetadata = Helper.TryGetFunctionalPointerParameterMetadata(parent, functionPointerTypeSymbol, idx, out var val) ? val : null;
         return $"{GetTypeName(parameterSymbol.Type, constMetadata)}";
     }
-    
+
     private static (string Type, string Name) GetFunctionPointerParameterType(IParameterSymbol parent, IFunctionPointerTypeSymbol functionPointerTypeSymbol)
     {
         var methodSymbol = functionPointerTypeSymbol.Signature;
@@ -120,10 +119,10 @@ public class InjectorGenerator : ISourceGenerator
         var returnMetadata = Helper.TryGetFunctionalPointerParameterMetadata(parent, functionPointerTypeSymbol, methodSymbol.Parameters.Length, out var val) ? val : null;
         var returnType = GetReturnType(methodSymbol, returnMetadata);
         var parameters = string.Join(", ", methodSymbol.Parameters.Select((x, i) => GetFunctionPointerParameterType(parent, functionPointerTypeSymbol, x, i)));
-    
+
         return ($"{returnType} ({callingConvention} {name})({parameters})", string.Empty);
     }
-    
+
     private static (string Type, string Name) GetParameterType(IMethodSymbol parent, IParameterSymbol parameterSymbol)
     {
         if (parameterSymbol.Type is IFunctionPointerTypeSymbol functionPointerTypeSymbol)
@@ -132,7 +131,7 @@ public class InjectorGenerator : ISourceGenerator
         var constMetadata = Helper.TryGetParameterMetadata(parent, parameterSymbol, out var val) ? val : null;
         return ($"{GetTypeName(parameterSymbol.Type, constMetadata)}", parameterSymbol.MetadataName);
     }
-    
+
     public void Initialize(GeneratorInitializationContext context)
     {
         /*
@@ -141,7 +140,7 @@ public class InjectorGenerator : ISourceGenerator
             System.Diagnostics.Debugger.Launch();
         }
         */
-            
+
         context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
     }
 
@@ -149,7 +148,7 @@ public class InjectorGenerator : ISourceGenerator
     {
         if (context.SyntaxReceiver is not SyntaxReceiver receiver || receiver.Methods.Count == 0)
             return;
-        
+
         if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.rootnamespace", out var rootNamespace))
         {
             return;
@@ -158,7 +157,7 @@ public class InjectorGenerator : ISourceGenerator
         {
             return;
         }
-        
+
         if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.projectdir", out var projectDir))
         {
             return;

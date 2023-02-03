@@ -39,14 +39,14 @@ namespace BUTR.NativeAOT.Shared
         private static readonly ConcurrentCollections.ConcurrentHashSet<IntPtr> _pointers = new();
 
         public static int GetCurrentAllocations() => _pointers.Count;
-        
+
         [Conditional("TRACK_ALLOCATIONS")]
         private static void TrackAllocation(void* ptr)
         {
             var pointer = new IntPtr(ptr);
             if (!_pointers.Add(pointer)) throw new AllocationException("Allocation: Tracking an already allocated pointer!");
         }
-        
+
         [Conditional("TRACK_ALLOCATIONS")]
         private static void TrackDeallocation(void* ptr)
         {
@@ -68,7 +68,7 @@ namespace BUTR.NativeAOT.Shared
             _alloc = alloc;
             _dealloc = dealloc;
         }
-        
+
         public static void* Alloc(nuint byteCount)
         {
             var ptr = _alloc(byteCount);

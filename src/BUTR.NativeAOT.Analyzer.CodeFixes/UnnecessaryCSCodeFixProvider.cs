@@ -26,7 +26,7 @@ public class UnnecessaryCSCodeFixProvider : CodeFixProvider
     {
         var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
         var nodeToFix = root?.FindNode(context.Span, getInnermostNodeForTie: true);
-        
+
         if (context.Diagnostics.Any(x => x.Id == RuleIdentifiers.UnnecessaryIsConst) && nodeToFix?.Parent is AttributeSyntax attribute1)
         {
             context.RegisterCodeFix(
@@ -73,7 +73,7 @@ public class UnnecessaryCSCodeFixProvider : CodeFixProvider
     {
         if (nodeToFix.Parent is not TypeArgumentListSyntax typeArgumentList) return document;
         if (typeArgumentList.Parent is not GenericNameSyntax genericName) return document;
-        
+
         // Standard Attribute
         if (genericName.Parent is AttributeSyntax attribute)
         {
@@ -83,7 +83,7 @@ public class UnnecessaryCSCodeFixProvider : CodeFixProvider
                 editor.ReplaceNode(attribute, SyntaxFactory.Attribute(SyntaxFactory.ParseName("IsConst")));
             if (genericName.Identifier.Text == "IsNotConst")
                 editor.RemoveNode(attribute);
-        
+
             return editor.GetChangedDocument();
         }
         // Function Pointer
@@ -98,7 +98,7 @@ public class UnnecessaryCSCodeFixProvider : CodeFixProvider
 
             return editor.GetChangedDocument();
         }
-        
+
         return document;
     }
 
@@ -112,7 +112,7 @@ public class UnnecessaryCSCodeFixProvider : CodeFixProvider
 
         return editor.GetChangedDocument();
     }
-    
+
     private static async Task<Document> RemoveFunctionPointerParameterIsConst(Document document, IdentifierNameSyntax nodeToFix, CancellationToken ct)
     {
         if (!document.SupportsSemanticModel) return document;

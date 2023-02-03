@@ -34,13 +34,13 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
         private static void Action(SyntaxNodeAnalysisContext context)
         {
             if (context.Node is not MethodDeclarationSyntax methodDeclarationSyntax) return;
-            
+
             if (context.ContainingSymbol is not IMethodSymbol methodSymbol) return;
-            
-            var hasUnmanagedCallersOnly = methodSymbol.GetAttributes().Any(x => x.AttributeClass is not null && Helper.CompareAttributeName(x.AttributeClass, "UnmanagedCallersOnly"));
+
+            var hasUnmanagedCallersOnly = methodSymbol.GetAttributes().Any(x => Helper.CompareAttributeName(x.AttributeClass, "UnmanagedCallersOnly"));
             if (!hasUnmanagedCallersOnly) return;
 
-            
+
             if (Helper.TryGetMethodMetadata(methodSymbol, out var methodConstMetadata))
             {
                 CheckReturnType(context, methodSymbol, methodConstMetadata);
@@ -101,7 +101,7 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
                 context.ReportDiagnostic(RuleIdentifiers.ReportRequiredIsConstRule(ctx, NameFormatter.ReflectionName(methodSymbol.ReturnType)));
             }
         }
-        
+
         private static void CheckParameter(SyntaxNodeAnalysisContext context, IParameterSymbol parameterSymbol, ConstMetadata constMetadata)
         {
             if (parameterSymbol.Type is not IPointerTypeSymbol && constMetadata.IsPointingToConst)
@@ -131,7 +131,7 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
                 context.ReportDiagnostic(RuleIdentifiers.ReportRequiredIsConstRule(ctx, NameFormatter.ReflectionName(parameterSymbol.Type)));
             }
         }
-        
+
         private static void CheckFunctionPointerParameter(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, IParameterSymbol parameterSymbol, IFunctionPointerTypeSymbol functionPointerTypeSymbol, FunctionPointerTypeSyntax functionPointerTypeSyntax)
         {
             var functionalPointerParameterReturnMetadata = Helper.TryGetFunctionalPointerParameterMetadata(parameterSymbol, functionPointerTypeSymbol, methodSymbol.Parameters.Length, out var val) ? val : ConstMetadata.Empty;
@@ -143,7 +143,7 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
                 context.ReportDiagnostic(RuleIdentifiers.ReportRequiredConstMetaRule(ctx, NameFormatter.ReflectionName(functionPointerTypeSymbol)));
                 return;
             }
-            
+
             if (functionPointerTypeSymbol.Signature.ReturnType is not IPointerTypeSymbol && functionalPointerParameterReturnMetadata.IsPointingToConst)
             {
                 if (functionalPointerParameterReturnMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax() is not AttributeSyntax nodeRootRoot) return;

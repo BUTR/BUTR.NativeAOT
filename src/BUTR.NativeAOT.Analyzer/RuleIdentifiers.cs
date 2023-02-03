@@ -17,7 +17,7 @@ namespace BUTR.NativeAOT.Analyzer
 
         private static string GetHelpUri(string idenfifier) =>
             string.Format(CultureInfo.InvariantCulture, "https://github.com/BUTR/BUTR.NativeAOT.Analyzer/blob/master/docs/Rules/{0}.md", idenfifier);
-        
+
         internal static readonly DiagnosticDescriptor UnnecessaryIsConstRule = new(
             UnnecessaryIsConst,
             title: "Unnecessary IsConst",
@@ -27,7 +27,7 @@ namespace BUTR.NativeAOT.Analyzer
             isEnabledByDefault: true,
             description: "",
             helpLinkUri: GetHelpUri(UnnecessaryIsConst));
-        
+
         internal static readonly DiagnosticDescriptor UnnecessaryIsPtrConstRule = new(
             UnnecessaryIsPtrConst,
             title: "Unnecessary IsPtrConst",
@@ -65,7 +65,7 @@ namespace BUTR.NativeAOT.Analyzer
             description: "",
             helpLinkUri: GetHelpUri(RequiredConstMeta));
 
-        
+
         internal static Diagnostic ReportUnnecessaryIsConst(GenericContext context, string typeName) =>
             DiagnosticUtils.CreateDiagnostic(UnnecessaryIsConstRule, context, typeName);
         internal static Diagnostic ReportUnnecessaryIsPtrConst(GenericContext context, string typeName) =>
