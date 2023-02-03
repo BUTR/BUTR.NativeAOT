@@ -181,7 +181,7 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
                 if (functionPointerParameterSymbol.Type is not IPointerTypeSymbol && functionPointerParameterParameterMetadata.IsPointingToConst)
                 {
                     if (functionalPointerParameterReturnMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax() is not AttributeSyntax nodeRootRoot) continue;
-                    if (nodeRootRoot.Name is not GenericNameSyntax nodeRootRootName || nodeRootRootName.TypeArgumentList.Arguments[i] is not { } nodeRoot) continue;
+                    if (nodeRootRoot.Name is not GenericNameSyntax nodeRootRootName || i >= nodeRootRootName.TypeArgumentList.Arguments.Count || nodeRootRootName.TypeArgumentList.Arguments[i] is not { } nodeRoot) continue;
                     if (nodeRoot is not GenericNameSyntax nodeRootName || nodeRootName.TypeArgumentList.Arguments.Last() is not { } nodePtr) continue;
                     var ctx = new GenericContext(context.Compilation, () => nodePtr.GetLocation(), context.ReportDiagnostic);
                     context.ReportDiagnostic(RuleIdentifiers.ReportUnnecessaryIsPtrConst(ctx, NameFormatter.ReflectionName(functionPointerParameterSymbol.Type)));
@@ -190,7 +190,7 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
                 if (functionPointerParameterSymbol.Type is not IPointerTypeSymbol && functionPointerParameterParameterMetadata.IsConst)
                 {
                     if (functionalPointerParameterReturnMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax() is not AttributeSyntax nodeRootRoot) continue;
-                    if (nodeRootRoot.Name is not GenericNameSyntax nodeRootRootName || nodeRootRootName.TypeArgumentList.Arguments[i] is not { } nodeRoot) continue;
+                    if (nodeRootRoot.Name is not GenericNameSyntax nodeRootRootName || i >= nodeRootRootName.TypeArgumentList.Arguments.Count || nodeRootRootName.TypeArgumentList.Arguments[i] is not { } nodeRoot) continue;
                     var ctx = new GenericContext(context.Compilation, () => nodeRoot.GetLocation(), context.ReportDiagnostic);
                     context.ReportDiagnostic(RuleIdentifiers.ReportUnnecessaryIsConst(ctx, NameFormatter.ReflectionName(functionPointerParameterSymbol.Type)));
                 }
