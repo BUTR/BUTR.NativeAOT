@@ -9,16 +9,16 @@ using TestHelper;
 namespace BUTR.NativeAOT.Analyzer.Test;
 
 [TestClass]
-public class AttributeAnalyzerTest : BaseTest
+public class GeneralAnalyzerTest : BaseTest
 {
     private static ProjectBuilder CreateProjectBuilder() => new ProjectBuilder()
         .WithTargetFramework(TargetFramework.Net7_0)
-        .WithAnalyzer<RequiredAnalyzer>();
+        .WithAnalyzer<GeneralAnalyzer>();
 
     [TestMethod]
     public async Task Unnecessary_CodeFix_Test()
     {
-        await CreateProjectBuilder().WithAnalyzer<UnnecessaryAnalyzer>().WithSourceCode(@$"
+        await CreateProjectBuilder().WithSourceCode(@$"
 namespace BUTR.NativeAOT.Analyzer.Test
 {{
     using System.Runtime.InteropServices;
@@ -84,9 +84,61 @@ namespace BUTR.NativeAOT.Analyzer.Test
     }
 
     [TestMethod]
-    public async Task Unnecessary_ReturnType_Test()
+    public async Task Required_CodeFix_Test()
     {
-        await CreateProjectBuilder().WithAnalyzer<UnnecessaryAnalyzer>().WithSourceCode(@$"
+        await CreateProjectBuilder().WithSourceCode(@$"
+namespace BUTR.NativeAOT.Analyzer.Test
+{{
+    using System.Runtime.InteropServices;
+    using BUTR.NativeAOT.Shared;
+
+    unsafe class Test
+    {{
+        [UnmanagedCallersOnly]
+        public static [||][||]void* Method10() => null;
+
+
+        [UnmanagedCallersOnly]
+        public static void Method11([||]delegate* unmanaged[Cdecl]<char, void*> p) {{ }}
+        [UnmanagedCallersOnly]
+        public static void Method12([ConstMeta<IsNotConst, IsNotConst>] delegate* unmanaged[Cdecl]<[||][||]char*, void> p) {{ }}
+        [UnmanagedCallersOnly]
+        public static void Method13([ConstMeta<IsNotConst<IsPtrConst>, IsNotConst>] delegate* unmanaged[Cdecl]<[||]char*, void> p) {{ }}
+        [UnmanagedCallersOnly]
+        public static void Method14([ConstMeta<IsNotConst, IsNotConst>] delegate* unmanaged[Cdecl]<char, [||][||]void*> p) {{ }}
+        [UnmanagedCallersOnly]
+        public static void Method15([ConstMeta<IsNotConst, IsNotConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char, [||]void*> p) {{ }}
+    }}
+}}{CodeBase}").WithCodeFixProvider<RequiredCSCodeFixProvider>().ShouldBatchFixCodeWith(@$"
+namespace BUTR.NativeAOT.Analyzer.Test
+{{
+    using System.Runtime.InteropServices;
+    using BUTR.NativeAOT.Shared;
+
+    unsafe class Test
+    {{
+        [UnmanagedCallersOnly, IsConst<IsPtrConst>]
+        public static void* Method10() => null;
+
+
+        [UnmanagedCallersOnly]
+        public static void Method11([ConstMeta<IsNotConst, IsConst<IsPtrConst>>]delegate* unmanaged[Cdecl]<char, [||][||]void*> p) {{ }}
+        [UnmanagedCallersOnly]
+        public static void Method12([ConstMeta<IsConst<IsPtrConst>, IsNotConst>] delegate* unmanaged[Cdecl]<char*, void> p) {{ }}
+        [UnmanagedCallersOnly]
+        public static void Method13([ConstMeta<IsConst<IsPtrConst>, IsNotConst>] delegate* unmanaged[Cdecl]<char*, void> p) {{ }}
+        [UnmanagedCallersOnly]
+        public static void Method14([ConstMeta<IsNotConst, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char, void*> p) {{ }}
+        [UnmanagedCallersOnly]
+        public static void Method15([ConstMeta<IsNotConst, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char, void*> p) {{ }}
+    }}
+}}{CodeBase}").ValidateAsync();
+    }
+
+    [TestMethod]
+    public async Task ReturnType_Test()
+    {
+        await CreateProjectBuilder().WithSourceCode(@$"
 namespace BUTR.NativeAOT.Analyzer.Test
 {{
     using System.Runtime.CompilerServices;
@@ -112,43 +164,6 @@ namespace BUTR.NativeAOT.Analyzer.Test
 
 
         [UnmanagedCallersOnly]
-        public static void* Method12() => null;
-        [UnmanagedCallersOnly]
-        public static void* Method22() => null;
-        [UnmanagedCallersOnly]
-        public static void* Method32() => null;
-    }}
-}}{CodeBase}").ValidateAsync();
-    }
-    [TestMethod]
-    public async Task Required_ReturnType_Test()
-    {
-        await CreateProjectBuilder().WithAnalyzer<RequiredAnalyzer>().WithSourceCode(@$"
-namespace BUTR.NativeAOT.Analyzer.Test
-{{
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-    using BUTR.NativeAOT.Shared;
-
-    unsafe class Test
-    {{
-        [UnmanagedCallersOnly, IsConst]
-        public static void* Method10() => null;
-        [UnmanagedCallersOnly, IsConst<IsPtrConst>]
-        public static void* Method20() => null;
-        [UnmanagedCallersOnly, IsNotConst<IsPtrConst>]
-        public static void* Method30() => null;
-
-
-        [UnmanagedCallersOnly, IsConst]
-        public static void Method11() {{ }}
-        [UnmanagedCallersOnly, IsConst<IsPtrConst>]
-        public static void Method21() {{ }}
-        [UnmanagedCallersOnly, IsNotConst<IsPtrConst>]
-        public static void Method31() {{ }}
-
-
-        [UnmanagedCallersOnly]
         public static [||][||]void* Method12() => null;
         [UnmanagedCallersOnly]
         public static [||][||]void* Method22() => null;
@@ -159,9 +174,9 @@ namespace BUTR.NativeAOT.Analyzer.Test
     }
 
     [TestMethod]
-    public async Task Unnecessary_Parameter_Test()
+    public async Task Parameter_Test()
     {
-        await CreateProjectBuilder().WithAnalyzer<UnnecessaryAnalyzer>().WithSourceCode(@$"
+        await CreateProjectBuilder().WithSourceCode(@$"
 namespace BUTR.NativeAOT.Analyzer.Test
 {{
     using System.Runtime.CompilerServices;
@@ -191,80 +206,11 @@ namespace BUTR.NativeAOT.Analyzer.Test
     }}
 }}{CodeBase}").ValidateAsync();
     }
-    [TestMethod]
-    public async Task Required_Parameter_Test()
-    {
-        await CreateProjectBuilder().WithAnalyzer<RequiredAnalyzer>().WithSourceCode(@$"
-namespace BUTR.NativeAOT.Analyzer.Test
-{{
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-    using BUTR.NativeAOT.Shared;
-
-    unsafe class Test
-    {{
-        [UnmanagedCallersOnly]
-        public static void Method10([IsConst] char* p) {{ }}
-
-        [UnmanagedCallersOnly]
-        public static void Method20([IsConst<IsPtrConst>] char* p) {{ }}
-
-        [UnmanagedCallersOnly]
-        public static void Method30([IsNotConst<IsPtrConst>] char* p) {{ }}
-
-
-        [UnmanagedCallersOnly]
-        public static void Method10([IsConst] char p) {{ }}
-
-        [UnmanagedCallersOnly]
-        public static void Method20([IsConst<IsPtrConst>] char p) {{ }}
-
-        [UnmanagedCallersOnly]
-        public static void Method30([IsNotConst<IsPtrConst>] char p) {{ }}
-    }}
-}}{CodeBase}").ValidateAsync();
-    }
 
     [TestMethod]
-    public async Task Unnecessary_FunctionalParameter_Test()
+    public async Task FunctionalParameter_Test()
     {
-        await CreateProjectBuilder().WithAnalyzer<UnnecessaryAnalyzer>().WithSourceCode(@$"
-namespace BUTR.NativeAOT.Analyzer.Test
-{{
-    using System.Runtime.InteropServices;
-    using BUTR.NativeAOT.Shared;
-
-    unsafe class Test
-    {{
-        [UnmanagedCallersOnly]
-        public static void Method10([ConstMeta<IsConst, IsConst>] delegate* unmanaged[Cdecl]<char*, void*> p) {{ }}
-        [UnmanagedCallersOnly]
-        public static void Method20([ConstMeta<IsConst<IsPtrConst>, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char*, void*> p) {{ }}
-        [UnmanagedCallersOnly]
-        public static void Method30([ConstMeta<IsNotConst<IsPtrConst>, IsNotConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char*, void*> p) {{ }}
-
-
-        [UnmanagedCallersOnly]
-        public static void Method11([ConstMeta<[||]IsConst, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char, void*> p) {{ }}
-        [UnmanagedCallersOnly]
-        public static void Method21([ConstMeta<[||]IsConst<[||]IsPtrConst>, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char, void*> p) {{ }}
-        [UnmanagedCallersOnly]
-        public static void Method31([ConstMeta<IsNotConst<[||]IsPtrConst>, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char, void*> p) {{ }}
-
-
-        [UnmanagedCallersOnly]
-        public static void Method12([ConstMeta<IsConst<IsPtrConst>, [||]IsConst>] delegate* unmanaged[Cdecl]<char*, void> p) {{ }}
-        [UnmanagedCallersOnly]
-        public static void Method22([ConstMeta<IsConst<IsPtrConst>, [||]IsConst<[||]IsPtrConst>>] delegate* unmanaged[Cdecl]<char*, void> p) {{ }}
-        [UnmanagedCallersOnly]
-        public static void Method32([ConstMeta<IsConst<IsPtrConst>, IsNotConst<[||]IsPtrConst>>] delegate* unmanaged[Cdecl]<char*, void> p) {{ }}
-    }}
-}}{CodeBase}").ValidateAsync();
-    }
-    [TestMethod]
-    public async Task Required_FunctionalParameter_Test()
-    {
-        await CreateProjectBuilder().WithAnalyzer<RequiredAnalyzer>().WithSourceCode(@$"
+        await CreateProjectBuilder().WithSourceCode(@$"
 namespace BUTR.NativeAOT.Analyzer.Test
 {{
     using System.Runtime.InteropServices;
@@ -281,19 +227,19 @@ namespace BUTR.NativeAOT.Analyzer.Test
 
 
         [UnmanagedCallersOnly]
-        public static void Method11([ConstMeta<IsConst, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char, void*> p) {{ }}
+        public static void Method11([ConstMeta<[||]IsConst, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char, void*> p) {{ }}
         [UnmanagedCallersOnly]
-        public static void Method21([ConstMeta<IsConst<IsPtrConst>, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char, void*> p) {{ }}
+        public static void Method21([ConstMeta<[||]IsConst<[||]IsPtrConst>, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char, void*> p) {{ }}
         [UnmanagedCallersOnly]
-        public static void Method31([ConstMeta<IsNotConst<IsPtrConst>, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char, void*> p) {{ }}
+        public static void Method31([ConstMeta<IsNotConst<[||]IsPtrConst>, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char, void*> p) {{ }}
 
 
         [UnmanagedCallersOnly]
-        public static void Method12([ConstMeta<IsConst<IsPtrConst>, IsConst>] delegate* unmanaged[Cdecl]<char*, void> p) {{ }}
+        public static void Method12([ConstMeta<IsConst<IsPtrConst>, [||]IsConst>] delegate* unmanaged[Cdecl]<char*, void> p) {{ }}
         [UnmanagedCallersOnly]
-        public static void Method22([ConstMeta<IsConst<IsPtrConst>, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char*, void> p) {{ }}
+        public static void Method22([ConstMeta<IsConst<IsPtrConst>, [||]IsConst<[||]IsPtrConst>>] delegate* unmanaged[Cdecl]<char*, void> p) {{ }}
         [UnmanagedCallersOnly]
-        public static void Method32([ConstMeta<IsConst<IsPtrConst>, IsNotConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char*, void> p) {{ }}
+        public static void Method32([ConstMeta<IsConst<IsPtrConst>, IsNotConst<[||]IsPtrConst>>] delegate* unmanaged[Cdecl]<char*, void> p) {{ }}
     }}
 }}{CodeBase}").ValidateAsync();
     }
