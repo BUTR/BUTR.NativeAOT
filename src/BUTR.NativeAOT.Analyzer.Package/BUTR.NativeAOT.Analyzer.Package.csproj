@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
 
-    <GITHUB_RUN_NUMBER Condition="$(GITHUB_RUN_NUMBER) == ''">0</GITHUB_RUN_NUMBER>
-    <Version>1.0.$(GITHUB_RUN_NUMBER)</Version>
+    <VersionOverride>0</VersionOverride>
+    <Version>1.0.$(VersionOverride)</Version>
 
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>

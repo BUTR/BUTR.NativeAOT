@@ -5,6 +5,9 @@
     <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
 
+    <VersionOverride>0</VersionOverride>
+    <Version>1.0.$(VersionOverride)</Version>
+    
     <IsPackable>false</IsPackable>
 
     <!-- Avoid ID conflicts with the package project. -->

@@ -109,6 +109,14 @@ namespace BUTR.NativeAOT.Analyzer.Test
         public static void Method21() {{ }}
         [UnmanagedCallersOnly, IsNotConst<[||]IsPtrConst>]
         public static void Method31() {{ }}
+
+
+        [UnmanagedCallersOnly]
+        public static [||][||]void* Method12() => null;
+        [UnmanagedCallersOnly]
+        public static [||][||]void* Method22() => null;
+        [UnmanagedCallersOnly]
+        public static [||][||]void* Method32() => null;
     }}
 }}{CodeBase}").ValidateAsync();
     }
@@ -159,11 +167,11 @@ namespace BUTR.NativeAOT.Analyzer.Test
     unsafe class Test
     {{
         [UnmanagedCallersOnly]
-        public static void Method10([ConstMeta<IsConst, IsConst>] delegate* unmanaged[Cdecl]<char*, void*> p) {{ }}
+        public static void Method10([ConstMeta<IsConst, IsConst>] delegate* unmanaged[Cdecl]<[||]char*, [||]void*> p) {{ }}
         [UnmanagedCallersOnly]
         public static void Method20([ConstMeta<IsConst<IsPtrConst>, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char*, void*> p) {{ }}
         [UnmanagedCallersOnly]
-        public static void Method30([ConstMeta<IsNotConst<IsPtrConst>, IsNotConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char*, void*> p) {{ }}
+        public static void Method30([ConstMeta<IsNotConst<IsPtrConst>, IsNotConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<[||]char*, [||]void*> p) {{ }}
 
 
         [UnmanagedCallersOnly]

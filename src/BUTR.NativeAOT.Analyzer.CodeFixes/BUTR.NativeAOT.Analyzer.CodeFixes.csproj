@@ -5,6 +5,11 @@
     <LangVersion>10.0</LangVersion>
     <IsPackable>false</IsPackable>
     <RootNamespace>BUTR.NativeAOT.Analyzer</RootNamespace>
+
+    <VersionOverride>0</VersionOverride>
+    <Version>1.0.$(VersionOverride)</Version>
+    
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
