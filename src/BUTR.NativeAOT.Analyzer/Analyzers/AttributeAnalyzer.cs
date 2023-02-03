@@ -64,7 +64,7 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
                 {
                     if (Helper.TryGetParameterMetadata(methodSymbol, parameterSymbol, out var parameterConstMetadata))
                     {
-                        CheckParameter(context, parameterSymbol, i, parameterConstMetadata);
+                        CheckParameter(context, parameterSymbol, parameterConstMetadata);
                     }
                     else
                     {
@@ -78,14 +78,14 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
         {
             if (methodSymbol.ReturnType is not IPointerTypeSymbol && constMetadata.IsPointingToConst)
             {
-                var nodeRoot = (AttributeSyntax) constMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax();
-                var nodePtr = (nodeRoot.Name as GenericNameSyntax).TypeArgumentList.Arguments[0];
+                if (constMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax() is not AttributeSyntax nodeRoot) return;
+                if (nodeRoot.Name is not GenericNameSyntax nodeRootName || nodeRootName.TypeArgumentList.Arguments[0] is not { } nodePtr) return;
                 var ctx = new GenericContext(context.Compilation, () => nodePtr.GetLocation(), context.ReportDiagnostic);
                 context.ReportDiagnostic(RuleIdentifiers.ReportUnnecessaryIsPtrConst(ctx, NameFormatter.ReflectionName(methodSymbol.ReturnType)));
             }
             if (methodSymbol.ReturnType is not IPointerTypeSymbol && constMetadata.IsConst)
             {
-                var nodeRoot = (AttributeSyntax) constMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax();
+                if (constMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax() is not AttributeSyntax nodeRoot) return;
                 var ctx = new GenericContext(context.Compilation, () => nodeRoot.GetLocation(), context.ReportDiagnostic);
                 context.ReportDiagnostic(RuleIdentifiers.ReportUnnecessaryIsConst(ctx, NameFormatter.ReflectionName(methodSymbol.ReturnType)));
             }
@@ -104,18 +104,18 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
             }
         }
 
-        private static void CheckParameter(SyntaxNodeAnalysisContext context, IParameterSymbol parameterSymbol, int parameterIdx, ConstMetadata constMetadata)
+        private static void CheckParameter(SyntaxNodeAnalysisContext context, IParameterSymbol parameterSymbol, ConstMetadata constMetadata)
         {
             if (parameterSymbol.Type is not IPointerTypeSymbol && constMetadata.IsPointingToConst)
             {
-                var nodeRoot = (AttributeSyntax) constMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax();
-                var nodePtr = (nodeRoot.Name as GenericNameSyntax).TypeArgumentList.Arguments[parameterIdx];
+                if (constMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax() is not AttributeSyntax nodeRoot) return;
+                if (nodeRoot.Name is not GenericNameSyntax nodeRootName || nodeRootName.TypeArgumentList.Arguments[0] is not { } nodePtr) return;
                 var ctx = new GenericContext(context.Compilation, () => nodePtr.GetLocation(), context.ReportDiagnostic);
                 context.ReportDiagnostic(RuleIdentifiers.ReportUnnecessaryIsPtrConst(ctx, NameFormatter.ReflectionName(parameterSymbol.Type)));
             }
             if (parameterSymbol.Type is not IPointerTypeSymbol && constMetadata.IsConst)
             {
-                var nodeRoot = (AttributeSyntax) constMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax();
+                if (constMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax() is not AttributeSyntax nodeRoot) return;
                 var ctx = new GenericContext(context.Compilation, () => nodeRoot.GetLocation(), context.ReportDiagnostic);
                 context.ReportDiagnostic(RuleIdentifiers.ReportRequiredIsPtrConstRule(ctx, NameFormatter.ReflectionName(parameterSymbol.Type)));
             }
