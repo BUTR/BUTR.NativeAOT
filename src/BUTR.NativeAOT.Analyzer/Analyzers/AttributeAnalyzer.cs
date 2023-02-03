@@ -174,8 +174,8 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
 
             for (var i = 0; i < functionalPointerParameterParameters.Length; i++)
             {
-                if (i < functionPointerTypeSymbol.Signature.Parameters.Length) continue;
-                if (i < functionPointerTypeSyntax.ParameterList.Parameters.Count) continue;
+                if (i >= functionPointerTypeSymbol.Signature.Parameters.Length) continue;
+                if (i >= functionPointerTypeSyntax.ParameterList.Parameters.Count) continue;
                 
                 var functionPointerParameterParameterMetadata = functionalPointerParameterParameters[i];
                 var functionPointerParameterSymbol = functionPointerTypeSymbol.Signature.Parameters[i];
