@@ -51,8 +51,9 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
                 CheckReturnTypeNotExist(context, methodSymbol, methodDeclarationSyntax);
             }
 
-            foreach (var parameterSyntax in methodDeclarationSyntax.ParameterList.Parameters)
+            for (var i = 0; i < methodDeclarationSyntax.ParameterList.Parameters.Count; i++)
             {
+                var parameterSyntax = methodDeclarationSyntax.ParameterList.Parameters[i];
                 if (context.SemanticModel.GetDeclaredSymbol(parameterSyntax) is not { } parameterSymbol) continue;
 
                 if (parameterSymbol.Type is IFunctionPointerTypeSymbol functionPointerTypeSymbol)
@@ -63,7 +64,7 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
                 {
                     if (Helper.TryGetParameterMetadata(methodSymbol, parameterSymbol, out var parameterConstMetadata))
                     {
-                        CheckParameter(context, parameterSymbol, parameterConstMetadata);
+                        CheckParameter(context, parameterSymbol, i, parameterConstMetadata);
                     }
                     else
                     {
@@ -103,7 +104,7 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
             }
         }
 
-        private static void CheckParameter(SyntaxNodeAnalysisContext context, IParameterSymbol parameterSymbol, ConstMetadata constMetadata)
+        private static void CheckParameter(SyntaxNodeAnalysisContext context, IParameterSymbol parameterSymbol, int parameterIdx, ConstMetadata constMetadata)
         {
             if (parameterSymbol.Type is not IPointerTypeSymbol && constMetadata.IsPointingToConst)
             {
@@ -173,45 +174,37 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
 
             for (var i = 0; i < functionalPointerParameterParameters.Length; i++)
             {
-                try
+                var functionPointerParameterParameterMetadata = functionalPointerParameterParameters[i];
+                var functionPointerParameterSymbol = functionPointerTypeSymbol.Signature.Parameters[i];
+                var functionPointerParameterSyntax = functionPointerTypeSyntax.ParameterList.Parameters[i];
+
+                if (functionPointerParameterSymbol.Type is not IPointerTypeSymbol && functionPointerParameterParameterMetadata.IsPointingToConst)
                 {
-                    var functionPointerParameterParameterMetadata = functionalPointerParameterParameters[i];
-                    var functionPointerParameterSymbol = functionPointerTypeSymbol.Signature.Parameters[i];
-                    var functionPointerParameterSyntax = functionPointerTypeSyntax.ParameterList.Parameters[i];
-
-                    if (functionPointerParameterSymbol.Type is not IPointerTypeSymbol && functionPointerParameterParameterMetadata.IsPointingToConst)
-                    {
-                        if (functionalPointerParameterReturnMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax() is not AttributeSyntax nodeRootRoot) continue;
-                        if (nodeRootRoot.Name is not GenericNameSyntax nodeRootRootName || nodeRootRootName.TypeArgumentList.Arguments[i] is not { } nodeRoot) continue;
-                        if (nodeRoot is not GenericNameSyntax nodeRootName || nodeRootName.TypeArgumentList.Arguments.Last() is not { } nodePtr) continue;
-                        var ctx = new GenericContext(context.Compilation, () => nodePtr.GetLocation(), context.ReportDiagnostic);
-                        context.ReportDiagnostic(RuleIdentifiers.ReportUnnecessaryIsPtrConst(ctx, NameFormatter.ReflectionName(functionPointerParameterSymbol.Type)));
-                    }
-
-                    if (functionPointerParameterSymbol.Type is not IPointerTypeSymbol && functionPointerParameterParameterMetadata.IsConst)
-                    {
-                        if (functionalPointerParameterReturnMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax() is not AttributeSyntax nodeRootRoot) continue;
-                        if (nodeRootRoot.Name is not GenericNameSyntax nodeRootRootName || nodeRootRootName.TypeArgumentList.Arguments[i] is not { } nodeRoot) continue;
-                        var ctx = new GenericContext(context.Compilation, () => nodeRoot.GetLocation(), context.ReportDiagnostic);
-                        context.ReportDiagnostic(RuleIdentifiers.ReportUnnecessaryIsConst(ctx, NameFormatter.ReflectionName(functionPointerParameterSymbol.Type)));
-                    }
-
-                    if (functionPointerParameterSymbol.Type is IPointerTypeSymbol && !functionPointerParameterParameterMetadata.IsPointingToConst)
-                    {
-                        var ctx = new GenericContext(context.Compilation, () => functionPointerParameterSyntax.GetLocation(), context.ReportDiagnostic);
-                        context.ReportDiagnostic(RuleIdentifiers.ReportRequiredIsPtrConstRule(ctx, NameFormatter.ReflectionName(functionPointerParameterSymbol.Type)));
-                    }
-
-                    if (functionPointerParameterSymbol.Type is IPointerTypeSymbol && !functionPointerParameterParameterMetadata.IsConst)
-                    {
-                        var ctx = new GenericContext(context.Compilation, () => functionPointerParameterSyntax.GetLocation(), context.ReportDiagnostic);
-                        context.ReportDiagnostic(RuleIdentifiers.ReportRequiredIsConstRule(ctx, NameFormatter.ReflectionName(functionPointerParameterSymbol.Type)));
-                    }
+                    if (functionalPointerParameterReturnMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax() is not AttributeSyntax nodeRootRoot) continue;
+                    if (nodeRootRoot.Name is not GenericNameSyntax nodeRootRootName || nodeRootRootName.TypeArgumentList.Arguments[i] is not { } nodeRoot) continue;
+                    if (nodeRoot is not GenericNameSyntax nodeRootName || nodeRootName.TypeArgumentList.Arguments.Last() is not { } nodePtr) continue;
+                    var ctx = new GenericContext(context.Compilation, () => nodePtr.GetLocation(), context.ReportDiagnostic);
+                    context.ReportDiagnostic(RuleIdentifiers.ReportUnnecessaryIsPtrConst(ctx, NameFormatter.ReflectionName(functionPointerParameterSymbol.Type)));
                 }
-                catch (Exception e)
+
+                if (functionPointerParameterSymbol.Type is not IPointerTypeSymbol && functionPointerParameterParameterMetadata.IsConst)
                 {
-                    var ctx = new GenericContext(context.Compilation, () => functionPointerTypeSyntax.ParameterList.Parameters.Last().GetLocation(), context.ReportDiagnostic);
-                    context.ReportDiagnostic(RuleIdentifiers.ReportRequiredIsConstRule(ctx, $"{i}; {e}"));
+                    if (functionalPointerParameterReturnMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax() is not AttributeSyntax nodeRootRoot) continue;
+                    if (nodeRootRoot.Name is not GenericNameSyntax nodeRootRootName || nodeRootRootName.TypeArgumentList.Arguments[i] is not { } nodeRoot) continue;
+                    var ctx = new GenericContext(context.Compilation, () => nodeRoot.GetLocation(), context.ReportDiagnostic);
+                    context.ReportDiagnostic(RuleIdentifiers.ReportUnnecessaryIsConst(ctx, NameFormatter.ReflectionName(functionPointerParameterSymbol.Type)));
+                }
+
+                if (functionPointerParameterSymbol.Type is IPointerTypeSymbol && !functionPointerParameterParameterMetadata.IsPointingToConst)
+                {
+                    var ctx = new GenericContext(context.Compilation, () => functionPointerParameterSyntax.GetLocation(), context.ReportDiagnostic);
+                    context.ReportDiagnostic(RuleIdentifiers.ReportRequiredIsPtrConstRule(ctx, NameFormatter.ReflectionName(functionPointerParameterSymbol.Type)));
+                }
+
+                if (functionPointerParameterSymbol.Type is IPointerTypeSymbol && !functionPointerParameterParameterMetadata.IsConst)
+                {
+                    var ctx = new GenericContext(context.Compilation, () => functionPointerParameterSyntax.GetLocation(), context.ReportDiagnostic);
+                    context.ReportDiagnostic(RuleIdentifiers.ReportRequiredIsConstRule(ctx, NameFormatter.ReflectionName(functionPointerParameterSymbol.Type)));
                 }
             }
         }
