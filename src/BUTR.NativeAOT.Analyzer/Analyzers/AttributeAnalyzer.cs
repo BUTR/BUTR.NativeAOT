@@ -109,7 +109,7 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
             if (parameterSymbol.Type is not IPointerTypeSymbol && constMetadata.IsPointingToConst)
             {
                 var nodeRoot = (AttributeSyntax) constMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax();
-                var nodePtr = (nodeRoot.Name as GenericNameSyntax).TypeArgumentList.Arguments[0];
+                var nodePtr = (nodeRoot.Name as GenericNameSyntax).TypeArgumentList.Arguments[parameterIdx];
                 var ctx = new GenericContext(context.Compilation, () => nodePtr.GetLocation(), context.ReportDiagnostic);
                 context.ReportDiagnostic(RuleIdentifiers.ReportUnnecessaryIsPtrConst(ctx, NameFormatter.ReflectionName(parameterSymbol.Type)));
             }
