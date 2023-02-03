@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace BUTR.NativeAOT.Analyzer;
 
 [ExportCodeFixProvider(LanguageNames.CSharp), Shared]
-public class ReplaceIsConstCSCodeFixProvider : CodeFixProvider
+public class UnnecessaryCSCodeFixProvider : CodeFixProvider
 {
     private const string Title = "Fix the issue";
 

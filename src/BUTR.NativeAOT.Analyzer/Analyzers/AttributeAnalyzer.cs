@@ -7,7 +7,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -20,7 +19,8 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
             RuleIdentifiers.UnnecessaryIsConstRule,
             RuleIdentifiers.UnnecessaryIsPtrConstRule,
             RuleIdentifiers.RequiredIsConstRule,
-            RuleIdentifiers.RequiredIsPtrConstRule
+            RuleIdentifiers.RequiredIsPtrConstRule,
+            RuleIdentifiers.RequiredConstMetaRule
         );
 
         public override void Initialize(AnalysisContext context)
@@ -133,6 +133,13 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
             var functionalPointerParameterReturnMetadata = Helper.TryGetFunctionalPointerParameterMetadata(parameterSymbol, functionPointerTypeSymbol, methodSymbol.Parameters.Length, out var val) ? val : ConstMetadata.Empty;
             var functionalPointerParameterParameters = methodSymbol.Parameters.Select((x, i) => Helper.TryGetFunctionalPointerParameterMetadata(x, functionPointerTypeSymbol, i, out var val) ? val : ConstMetadata.Empty).ToImmutableArray();
 
+            if (functionalPointerParameterReturnMetadata.AttributeData is null)
+            {
+                var ctx = new GenericContext(context.Compilation, () => functionPointerTypeSyntax.GetLocation(), context.ReportDiagnostic);
+                context.ReportDiagnostic(RuleIdentifiers.ReportRequiredConstMetaRule(ctx, NameFormatter.ReflectionName(functionPointerTypeSymbol)));
+                return;
+            }
+            
             if (functionPointerTypeSymbol.Signature.ReturnType is not IPointerTypeSymbol && functionalPointerParameterReturnMetadata.IsPointingToConst)
             {
                 if (functionalPointerParameterReturnMetadata.AttributeData.ApplicationSyntaxReference!.GetSyntax() is not AttributeSyntax nodeRootRoot) return;

@@ -13,6 +13,7 @@ namespace BUTR.NativeAOT.Analyzer
         public const string UnnecessaryIsPtrConst = "BNA0002";
         public const string RequiredIsConst = "BNA0003";
         public const string RequiredIsPtrConst = "BNA0004";
+        public const string RequiredConstMeta = "BNA0005";
 
         private static string GetHelpUri(string idenfifier) =>
             string.Format(CultureInfo.InvariantCulture, "https://github.com/BUTR/BUTR.NativeAOT.Analyzer/blob/master/docs/Rules/{0}.md", idenfifier);
@@ -45,7 +46,6 @@ namespace BUTR.NativeAOT.Analyzer
             isEnabledByDefault: true,
             description: "",
             helpLinkUri: GetHelpUri(RequiredIsConst));
-        
         internal static readonly DiagnosticDescriptor RequiredIsPtrConstRule = new(
             RequiredIsPtrConst,
             title: "Required IsPtrConst",
@@ -55,6 +55,15 @@ namespace BUTR.NativeAOT.Analyzer
             isEnabledByDefault: true,
             description: "",
             helpLinkUri: GetHelpUri(RequiredIsPtrConst));
+        internal static readonly DiagnosticDescriptor RequiredConstMetaRule = new(
+            RequiredConstMeta,
+            title: "Required ConstMeta",
+            messageFormat: "Required ConstMeta for function pointer '{0}'",
+            RuleCategories.Usage,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "",
+            helpLinkUri: GetHelpUri(RequiredConstMeta));
 
         
         internal static Diagnostic ReportUnnecessaryIsConst(GenericContext context, string typeName) =>
@@ -65,5 +74,7 @@ namespace BUTR.NativeAOT.Analyzer
             DiagnosticUtils.CreateDiagnostic(RequiredIsConstRule, context, typeName);
         internal static Diagnostic ReportRequiredIsPtrConstRule(GenericContext context, string typeName) =>
             DiagnosticUtils.CreateDiagnostic(RequiredIsPtrConstRule, context, typeName);
+        internal static Diagnostic ReportRequiredConstMetaRule(GenericContext context, string functionPointerName) =>
+            DiagnosticUtils.CreateDiagnostic(RequiredConstMetaRule, context, functionPointerName);
     }
 }

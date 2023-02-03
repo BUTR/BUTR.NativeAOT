@@ -16,7 +16,7 @@ public class AttributeAnalyzerTest : BaseTest
         .WithAnalyzer<AttributeAnalyzer>();
 
     [TestMethod]
-    public async Task CodeFix_Test()
+    public async Task Unnecessary_CodeFix_Test()
     {
         await CreateProjectBuilder().WithSourceCode(@$"
 namespace BUTR.NativeAOT.Analyzer.Test
@@ -49,7 +49,7 @@ namespace BUTR.NativeAOT.Analyzer.Test
         [UnmanagedCallersOnly]
         public static void Method32([ConstMeta<IsNotConst<[||]IsPtrConst>, IsConst<IsPtrConst>>] delegate* unmanaged[Cdecl]<char, void*> p) {{ }}
     }}
-}}{CodeBase}").WithCodeFixProvider<ReplaceIsConstCSCodeFixProvider>().ShouldBatchFixCodeWith(@$"
+}}{CodeBase}").WithCodeFixProvider<UnnecessaryCSCodeFixProvider>().ShouldBatchFixCodeWith(@$"
 namespace BUTR.NativeAOT.Analyzer.Test
 {{
     using System.Runtime.InteropServices;
