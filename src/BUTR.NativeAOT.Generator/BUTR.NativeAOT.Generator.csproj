@@ -46,7 +46,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BUTR.NativeAOT.Analyzer.Shared\BUTR.NativeAOT.Analyzer.Shared.csproj" />
+    <Compile Include="..\BUTR.NativeAOT.Analyzer.Shared\ConstFlags.cs">
+      <Link>ConstFlags.cs</Link>
+    </Compile>
+    <Compile Include="..\BUTR.NativeAOT.Analyzer.Shared\ConstMetadata.cs">
+      <Link>ConstMetadata.cs</Link>
+    </Compile>
+    <Compile Include="..\BUTR.NativeAOT.Analyzer.Shared\Helper.cs">
+      <Link>Helper.cs</Link>
+    </Compile>
   </ItemGroup>
   
 </Project>

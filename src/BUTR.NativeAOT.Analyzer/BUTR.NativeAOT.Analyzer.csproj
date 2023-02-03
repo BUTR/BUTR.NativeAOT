@@ -12,11 +12,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="IsExternalInit" Version="1.0.3" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BUTR.NativeAOT.Analyzer.Shared\BUTR.NativeAOT.Analyzer.Shared.csproj" />
+    <Compile Include="..\BUTR.NativeAOT.Analyzer.Shared\ConstFlags.cs">
+      <Link>ConstFlags.cs</Link>
+    </Compile>
+    <Compile Include="..\BUTR.NativeAOT.Analyzer.Shared\ConstMetadata.cs">
+      <Link>ConstMetadata.cs</Link>
+    </Compile>
+    <Compile Include="..\BUTR.NativeAOT.Analyzer.Shared\Helper.cs">
+      <Link>Helper.cs</Link>
+    </Compile>
   </ItemGroup>
 
 </Project>
