@@ -71,7 +71,7 @@ public class Helper
             return false;
         }
 
-        if (rootRoot.TypeArguments[idx] is INamedTypeSymbol root)
+        if (idx < rootRoot.TypeArguments.Length && rootRoot.TypeArguments[idx] is INamedTypeSymbol root)
         {
             if (CompareAttributeName(root, "IsConst"))
             {
