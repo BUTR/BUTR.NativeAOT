@@ -6,7 +6,7 @@ namespace BUTR.NativeAOT.Analyzer.Shared;
 
 public class Helper
 {
-    private static bool CompareAttributeName(ISymbol typeSymbol, string expected) => typeSymbol.MetadataName.Replace("Attribute", string.Empty) == expected;
+    public static bool CompareAttributeName(ISymbol? typeSymbol, string expected) => typeSymbol is not null && typeSymbol.MetadataName.Replace("Attribute", string.Empty) == expected;
 
     private static ConstFlags GetConstRootMetadata(INamedTypeSymbol typeSymbol)
     {

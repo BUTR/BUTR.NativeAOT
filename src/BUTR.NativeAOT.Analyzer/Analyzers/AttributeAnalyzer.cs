@@ -37,6 +37,10 @@ namespace BUTR.NativeAOT.Analyzer.Analyzers
             
             if (context.ContainingSymbol is not IMethodSymbol methodSymbol) return;
             
+            var hasUnmanagedCallersOnly = methodSymbol.GetAttributes().Any(x => x.AttributeClass is not null && Helper.CompareAttributeName(x.AttributeClass, "UnmanagedCallersOnly"));
+            if (!hasUnmanagedCallersOnly) return;
+
+            
             if (Helper.TryGetMethodMetadata(methodSymbol, out var methodConstMetadata))
             {
                 CheckReturnType(context, methodSymbol, methodConstMetadata);
