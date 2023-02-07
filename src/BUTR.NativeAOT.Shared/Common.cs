@@ -87,6 +87,12 @@ namespace BUTR.NativeAOT.Shared
     {
         static abstract TSelf* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner);
     }
+    public unsafe interface IReturnValueWithValueLength<TSelf, in TValue>
+        where TSelf : unmanaged, IReturnValueWithValueLength<TSelf, TValue>
+        where TValue : unmanaged
+    {
+        static abstract TSelf* AsValue(TValue* value, int length, bool isOwner);
+    }
     public unsafe interface IReturnValueWithValuePtr<TSelf, TValue>
         where TSelf : unmanaged, IReturnValueWithValuePtr<TSelf, TValue>
         where TValue : unmanaged
@@ -190,6 +196,21 @@ namespace BUTR.NativeAOT.Shared
         public readonly char* Value;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly unsafe struct param_data : IParameter<param_data>, IParameterSpanFormattable<param_data>, IParameterRawPtr<param_data, char>, IParameterIntPtr<param_data>
+    {
+        public static implicit operator param_data*(param_data value) => &value;
+        public static implicit operator char*(param_data ptr) => (char*) &ptr;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<char> ToSpan(param_data* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated((char*) ptr);
+        static IntPtr IParameterIntPtr<param_data>.ToPtr(param_data* ptr) => new(ptr);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static char* ToRawPtr(param_data* ptr) => (char*) ptr;
+
+        public readonly byte* Value;
+    }
+
 
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct return_value_void : IReturnValueWithNoValue<return_value_void>, IReturnValueWithError<return_value_void>, IReturnValueWithException<return_value_void>
@@ -238,6 +259,25 @@ namespace BUTR.NativeAOT.Shared
         private return_value_json(char* value, char* error)
         {
             Value = value;
+            Error = error;
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly unsafe struct return_value_data : IReturnValueWithValueLength<return_value_data, byte>, IReturnValueWithError<return_value_data>, IReturnValueWithException<return_value_data>
+    {
+        public static return_value_data* AsValue(byte* value, int length, bool isOwner) => Utils.Create(new return_value_data(value, length, null), isOwner);
+        public static return_value_data* AsError(char* error, bool isOwner) => Utils.Create(new return_value_data(null, 0, error), isOwner);
+        public static return_value_data* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_data>(e, isOwner);
+
+        public readonly char* Error;
+        public readonly byte* Value;
+        public readonly int Length;
+
+        private return_value_data(byte* value, int length, char* error)
+        {
+            Value = value;
+            Length = length;
             Error = error;
         }
     }

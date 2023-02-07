@@ -18,6 +18,7 @@ public static class HeaderStrings
 #endif
         typedef char16_t param_string;
         typedef char16_t param_json;
+        typedef uint8_t param_data;
         typedef uint8_t param_bool;
         typedef int32_t param_int;
         typedef uint32_t param_uint;
@@ -37,6 +38,12 @@ public static class HeaderStrings
             param_string *const error;
             param_json *const value;
         } return_value_json;
+        typedef struct return_value_data
+        {
+            param_string *const error;
+            param_data *const value;
+            param_int length;
+        } return_value_data;
         typedef struct return_value_bool
         {
             param_string *const error;

@@ -126,6 +126,21 @@ namespace BUTR.NativeAOT.Shared
             throw new NativeCallException(new string(hError));
         }
 
+        public SafeDataMallocHandle ValueAsData()
+        {
+            if (typeof(TStruct) != typeof(return_value_data))
+                throw new Exception();
+
+            var ptr = (return_value_data*) Value;
+            if (ptr->Error is null)
+            {
+                return new SafeDataMallocHandle(ptr->Value, ptr->Length, IsOwner);
+            }
+
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
+            throw new NativeCallException(new string(hError));
+        }
+        
         public bool ValueAsBool()
         {
             if (typeof(TStruct) != typeof(return_value_bool))
