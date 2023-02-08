@@ -163,14 +163,14 @@ public class InjectorGenerator : ISourceGenerator
             return;
         }
 
-        var methods = new StringBuilder();
-        foreach (var methodSymbol in receiver.Methods.Select(x => context.Compilation.GetSemanticModel(x.SyntaxTree).GetDeclaredSymbol(x)).OfType<IMethodSymbol>().OrderBy(x => x.Name))
+        var methodsBuilder = new StringBuilder();
+        var methods = receiver.Methods.Select(x => context.Compilation.GetSemanticModel(x.SyntaxTree).GetDeclaredSymbol(x)).OfType<IMethodSymbol>();
+        foreach (var (name, methodSymbol) in methods.Select(x => (GetMethodName(x), x)).OrderBy(x => x.Item2))
         {
             var callingConvention = GetCallingConvention(methodSymbol);
-            var name = GetMethodName(methodSymbol);
             var returnType = GetReturnType(methodSymbol, null);
             var parameters = string.Join(", ", methodSymbol.Parameters.Select(x => GetParameterType(methodSymbol, x)).Select(param => $"{param.Type} {param.Name}"));
-            methods.AppendLine($"    {returnType} {callingConvention} {name}({parameters});");
+            methodsBuilder.AppendLine($"    {returnType} {callingConvention} {name}({parameters});");
         }
 
         var cppNamespace = rootNamespace.Replace(".", "::");
