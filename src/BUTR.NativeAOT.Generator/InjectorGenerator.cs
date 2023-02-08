@@ -189,7 +189,7 @@ namespace {cppNamespace}
     {{
 #endif
 {HeaderStrings.Types}
-{methods}
+{methodsBuilder}
 
 #ifdef __cplusplus
     }}
