@@ -3,6 +3,7 @@
 using Microsoft.CodeAnalysis;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -165,7 +166,7 @@ public class InjectorGenerator : ISourceGenerator
 
         var methodsBuilder = new StringBuilder();
         var methods = receiver.Methods.Select(x => context.Compilation.GetSemanticModel(x.SyntaxTree).GetDeclaredSymbol(x)).OfType<IMethodSymbol>();
-        foreach (var (name, methodSymbol) in methods.Select(x => (GetMethodName(x), x)).OrderBy(x => x.Item2))
+        foreach (var (name, methodSymbol) in methods.Select(x => (GetMethodName(x), x)).OrderBy(x => x.Item1))
         {
             var callingConvention = GetCallingConvention(methodSymbol);
             var returnType = GetReturnType(methodSymbol, null);
