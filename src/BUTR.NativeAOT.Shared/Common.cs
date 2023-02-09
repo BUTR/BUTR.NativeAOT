@@ -46,6 +46,12 @@ namespace BUTR.NativeAOT.Shared
     {
         static abstract ReadOnlySpan<char> ToSpan(TSelf* ptr);
     }
+    public unsafe interface IParameterSpan<TSelf, TValue>
+        where TSelf : unmanaged, IParameterSpan<TSelf, TValue>
+        where TValue : unmanaged
+    {
+        static abstract ReadOnlySpan<TValue> ToSpan(TSelf* ptr, int length);
+    }
     public unsafe interface IParameterNonPtr<TSelf> where TSelf : unmanaged, IParameterNonPtr<TSelf>
     {
     }
@@ -197,16 +203,18 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct param_data : IParameter<param_data>, IParameterSpanFormattable<param_data>, IParameterRawPtr<param_data, char>, IParameterIntPtr<param_data>
+    public readonly unsafe struct param_data : IParameter<param_data>, IParameterSpanFormattable<param_data>, IParameterSpan<param_data, byte>, IParameterRawPtr<param_data, byte>, IParameterIntPtr<param_data>
     {
         public static implicit operator param_data*(param_data value) => &value;
-        public static implicit operator char*(param_data ptr) => (char*) &ptr;
+        public static implicit operator byte*(param_data ptr) => (byte*) &ptr;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> ToSpan(param_data* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated((char*) ptr);
+        public static ReadOnlySpan<char> ToSpan(param_data* ptr) => new IntPtr(ptr).ToString();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<byte> ToSpan(param_data* ptr, int length) => new(ptr, length);
         static IntPtr IParameterIntPtr<param_data>.ToPtr(param_data* ptr) => new(ptr);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static char* ToRawPtr(param_data* ptr) => (char*) ptr;
+        public static byte* ToRawPtr(param_data* ptr) => (byte*) ptr;
 
         public readonly byte* Value;
     }
