@@ -110,7 +110,7 @@ namespace BUTR.NativeAOT.Shared
             using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
             throw new NativeCallException(new string(hError));
         }
-        public TValue? ValueAsJson<TValue>(JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
+        public TValue? ValueAsJson<TValue>(JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null) where TValue : class
         {
             if (typeof(TStruct) != typeof(return_value_json))
                 throw new Exception();
