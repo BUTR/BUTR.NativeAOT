@@ -46,22 +46,20 @@ namespace BUTR.NativeAOT.Shared
         public static string SerializeJson<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => JsonSerializer.Serialize(value, jsonTypeInfo);
 
 
-        public static TValue DeserializeJson<TValue>(SafeStringMallocHandle json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
+        public static TValue? DeserializeJson<TValue>(SafeStringMallocHandle json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
+            where TValue: class
         {
             if (json.DangerousGetHandle() == IntPtr.Zero)
-            {
-                throw new JsonDeserializationException($"Received null parameter! Caller: {caller}, Type: {typeof(TValue)};");
-            }
+                return null;
 
             return DeserializeJson(json.ToSpan(), jsonTypeInfo, caller);
         }
 
-        public static unsafe TValue DeserializeJson<TValue>(param_json* json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
+        public static unsafe TValue? DeserializeJson<TValue>(param_json* json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
+            where TValue: class
         {
             if (json is null)
-            {
-                throw new JsonDeserializationException($"Received null parameter! Caller: {caller}, Type: {typeof(TValue)};");
-            }
+                return null;
 
             return DeserializeJson(param_json.ToSpan(json), jsonTypeInfo, caller);
         }
