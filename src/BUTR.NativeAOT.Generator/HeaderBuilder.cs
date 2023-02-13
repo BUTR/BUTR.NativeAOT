@@ -23,6 +23,11 @@ public static class HeaderStrings
         typedef int32_t param_int;
         typedef uint32_t param_uint;
         typedef void param_ptr;
+        typedef struct param_callback
+        {
+            void *p_callback_ptr;
+            void(__cdecl *p_callback)(param_ptr *, param_ptr *);
+        } param_callback;
 
         typedef struct return_value_void
         {

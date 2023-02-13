@@ -3,7 +3,6 @@
 using Microsoft.CodeAnalysis;
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -59,10 +58,14 @@ public class InjectorGenerator : ISourceGenerator
 
     private static string GetTypeName(ITypeSymbol type, ConstMetadata? constMetadataRaw = null)
     {
-        var constMetadata = constMetadataRaw ?? ConstMetadata.Empty;
+        //var constMetadata = constMetadataRaw ?? ConstMetadata.Empty;
+
+        //if (type is IPointerTypeSymbol pointerTypeSymbol)
+        //    return $"{(constMetadata.IsConst ? "const " : string.Empty)}{GetTypeName(pointerTypeSymbol.PointedAtType)}*{(constMetadata.IsPointingToConst ? " const" : string.Empty)}";
 
         if (type is IPointerTypeSymbol pointerTypeSymbol)
-            return $"{(constMetadata.IsConst ? "const " : string.Empty)}{GetTypeName(pointerTypeSymbol.PointedAtType)}*{(constMetadata.IsPointingToConst ? " const" : string.Empty)}";
+            return $"{GetTypeName(pointerTypeSymbol.PointedAtType)}*";
+
 
         switch (type.SpecialType)
         {
@@ -112,14 +115,20 @@ public class InjectorGenerator : ISourceGenerator
         return $"{GetTypeName(parameterSymbol.Type, constMetadata)}";
     }
 
-    private static (string Type, string Name) GetFunctionPointerParameterType(IParameterSymbol parent, IFunctionPointerTypeSymbol functionPointerTypeSymbol)
+    private static (string Type, string Name) GetFunctionPointerParameterType(IParameterSymbol parent, IFunctionPointerTypeSymbol functionPointerTypeSymbol, bool setName = true)
     {
         var methodSymbol = functionPointerTypeSymbol.Signature;
         var callingConvention = GetCallingConvention(methodSymbol);
-        var name = parent.MetadataName;
+        var name = setName ? parent.MetadataName : string.Empty;
         var returnMetadata = Helper.TryGetFunctionalPointerParameterMetadata(parent, functionPointerTypeSymbol, methodSymbol.Parameters.Length, out var val) ? val : null;
         var returnType = GetReturnType(methodSymbol, returnMetadata);
-        var parameters = string.Join(", ", methodSymbol.Parameters.Select((x, i) => GetFunctionPointerParameterType(parent, functionPointerTypeSymbol, x, i)));
+        var parameters = string.Join(", ", methodSymbol.Parameters.Select((x, i) =>
+        {
+            if (x.Type is IFunctionPointerTypeSymbol xFunctionPointerTypeSymbol)
+                return GetFunctionPointerParameterType(parent, xFunctionPointerTypeSymbol, false).Type;
+
+            return GetFunctionPointerParameterType(parent, functionPointerTypeSymbol, x, i);
+        }));
 
         return ($"{returnType} ({callingConvention} {name})({parameters})", string.Empty);
     }

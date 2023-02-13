@@ -136,7 +136,7 @@ namespace BUTR.NativeAOT.Shared
             {
                 return new SafeDataMallocHandle(ptr->Value, ptr->Length, IsOwner);
             }
-
+            
             using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
             throw new NativeCallException(new string(hError));
         }
