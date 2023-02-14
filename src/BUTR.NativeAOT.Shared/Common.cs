@@ -91,7 +91,7 @@ namespace BUTR.NativeAOT.Shared
     public unsafe interface IReturnValueWithValueJson<TSelf>
         where TSelf : unmanaged, IReturnValueWithValueJson<TSelf>
     {
-        static abstract TSelf* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner);
+        static abstract TSelf* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) where TValue: class;
     }
     public unsafe interface IReturnValueWithValueLength<TSelf, in TValue>
         where TSelf : unmanaged, IReturnValueWithValueLength<TSelf, TValue>
@@ -256,7 +256,7 @@ namespace BUTR.NativeAOT.Shared
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct return_value_json : IReturnValueWithValuePtr<return_value_json, char>, IReturnValueWithValueJson<return_value_json>, IReturnValueWithError<return_value_json>, IReturnValueWithException<return_value_json>
     {
-        public static return_value_json* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) => AsValue(Utils.SerializeJsonCopy(value, jsonTypeInfo, isOwner), isOwner);
+        public static return_value_json* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) where TValue: class => AsValue(Utils.SerializeJsonCopy(value, jsonTypeInfo, isOwner), isOwner);
         public static return_value_json* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_json(value, null), isOwner);
         public static return_value_json* AsError(char* error, bool isOwner) => Utils.Create(new return_value_json(null, error), isOwner);
         public static return_value_json* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_json>(e, isOwner);

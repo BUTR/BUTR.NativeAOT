@@ -38,13 +38,14 @@ namespace BUTR.NativeAOT.Shared
 
     internal static class Utils
     {
-        public static unsafe TSelf* AsException<TSelf>(Exception e, bool isOwner) where TSelf : unmanaged, IReturnValueWithError<TSelf> =>
-            TSelf.AsError(Copy(e.ToString(), isOwner), isOwner);
+        public static unsafe TSelf* AsException<TSelf>(Exception e, bool isOwner)
+            where TSelf : unmanaged, IReturnValueWithError<TSelf> => TSelf.AsError(Copy(e.ToString(), isOwner), isOwner);
 
-        public static SafeStringMallocHandle SerializeJsonCopy<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) => Copy(SerializeJson(value, jsonTypeInfo), isOwner);
+        public static SafeStringMallocHandle SerializeJsonCopy<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner)
+            where TValue: class => Copy(SerializeJson(value, jsonTypeInfo), isOwner);
 
-        public static string SerializeJson<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo) => JsonSerializer.Serialize(value, jsonTypeInfo);
-
+        public static string SerializeJson<TValue>(TValue? value, JsonTypeInfo<TValue> jsonTypeInfo)
+            where TValue: class => value is null ? string.Empty : JsonSerializer.Serialize(value, jsonTypeInfo);
 
         public static TValue? DeserializeJson<TValue>(SafeStringMallocHandle json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
             where TValue: class => json.DangerousGetHandle() == IntPtr.Zero ? null : DeserializeJson(json.ToSpan(), jsonTypeInfo, caller);
