@@ -124,7 +124,7 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct param_bool : IParameter<param_bool>, IParameterSpanFormattable<param_bool>, IParameterNonPtr<param_bool>
+    public readonly unsafe struct param_bool : IParameter<param_bool>, IParameterSpanFormattable<param_bool>, IParameterNonPtr<param_bool>, ISpanFormattable
     {
         public static implicit operator param_bool*(param_bool value) => &value;
         public static implicit operator param_bool(bool value) => new(value);
@@ -137,10 +137,14 @@ namespace BUTR.NativeAOT.Shared
 
         public param_bool() { }
         private param_bool(bool value) => Value = (byte) (value ? 1 : 0);
+
+        public string ToString(string? format, IFormatProvider? formatProvider) => Value.ToString(format, formatProvider);
+        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
+            Value.TryFormat(destination, out charsWritten, format, provider);
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct param_int : IParameter<param_int>, IParameterSpanFormattable<param_int>, IParameterNonPtr<param_int>
+    public readonly unsafe struct param_int : IParameter<param_int>, IParameterSpanFormattable<param_int>, IParameterNonPtr<param_int>, ISpanFormattable
     {
         public static implicit operator param_int*(param_int value) => &value;
         public static implicit operator param_int(int value) => new(value);
@@ -153,10 +157,14 @@ namespace BUTR.NativeAOT.Shared
 
         public param_int() { }
         private param_int(int value) => Value = value;
+
+        public string ToString(string? format, IFormatProvider? formatProvider) => Value.ToString(format, formatProvider);
+        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
+            Value.TryFormat(destination, out charsWritten, format, provider);
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct param_uint : IParameter<param_uint>, IParameterSpanFormattable<param_uint>, IParameterNonPtr<param_uint>
+    public readonly unsafe struct param_uint : IParameter<param_uint>, IParameterSpanFormattable<param_uint>, IParameterNonPtr<param_uint>, ISpanFormattable
     {
         public static implicit operator param_uint*(param_uint value) => &value;
         public static implicit operator param_uint(uint value) => new(value);
@@ -169,6 +177,10 @@ namespace BUTR.NativeAOT.Shared
 
         public param_uint() { }
         private param_uint(uint value) => Value = value;
+
+        public string ToString(string? format, IFormatProvider? formatProvider) => Value.ToString(format, formatProvider);
+        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
+            Value.TryFormat(destination, out charsWritten, format, provider);
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -217,6 +229,24 @@ namespace BUTR.NativeAOT.Shared
         public static byte* ToRawPtr(param_data* ptr) => (byte*) ptr;
 
         public readonly byte* Value;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly unsafe struct param_callback : IParameter<param_callback>, IParameterSpanFormattable<param_callback>, IParameterSpan<param_callback, byte>, IParameterRawPtr<param_callback, byte>, IParameterIntPtr<param_callback>
+    {
+        public static implicit operator param_callback*(param_callback value) => &value;
+        public static implicit operator byte*(param_callback ptr) => (byte*) &ptr;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<char> ToSpan(param_callback* ptr) => new IntPtr(ptr).ToString();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<byte> ToSpan(param_callback* ptr, int length) => new(ptr, length);
+        static IntPtr IParameterIntPtr<param_callback>.ToPtr(param_callback* ptr) => new(ptr);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte* ToRawPtr(param_callback* ptr) => (byte*) ptr;
+
+        public readonly void* CallbackPtr;
+        public readonly delegate* unmanaged[Cdecl]<param_ptr*, param_ptr*, void> Callback;
     }
 
 
