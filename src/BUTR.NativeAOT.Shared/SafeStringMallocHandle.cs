@@ -56,6 +56,8 @@ namespace BUTR.NativeAOT.Shared
         }
 
         public ReadOnlySpan<char> ToSpan() => MemoryMarshal.CreateReadOnlySpanFromNullTerminated((char*) handle.ToPointer());
+
+        public override string ToString() => ToSpan().ToString();
     }
 }
 #nullable restore
