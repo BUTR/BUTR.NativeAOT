@@ -67,7 +67,7 @@ namespace BUTR.NativeAOT.Shared
         }
 
 
-        private static unsafe SafeDataMallocHandle Copy(in ReadOnlySpan<byte> data, bool isOwner)
+        public static unsafe SafeDataMallocHandle Copy(in ReadOnlySpan<byte> data, bool isOwner)
         {
             var dst = (byte*) Allocator.Alloc(new UIntPtr((uint) data.Length));
             data.CopyTo(new Span<byte>(dst, data.Length));
