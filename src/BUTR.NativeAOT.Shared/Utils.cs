@@ -80,7 +80,7 @@ namespace BUTR.NativeAOT.Shared
         {
             var size = Unsafe.SizeOf<TValue>();
             var dst = (TValue*) Allocator.Alloc(new UIntPtr((uint) size));
-            MemoryMarshal.Write(new Span<byte>(dst, size), ref value);
+            MemoryMarshal.Write(new Span<byte>(dst, size), in value);
             return SafeStructMallocHandle.Create(dst, isOwner);
         }
     }
