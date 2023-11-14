@@ -37,10 +37,7 @@ namespace BUTR.NativeAOT.Shared
     [StructLayout(LayoutKind.Sequential, Size = 0)]
     public struct VoidPtr { }
 
-    public unsafe interface IParameter<TSelf> where TSelf : unmanaged, IParameter<TSelf>
-    {
-
-    }
+    public unsafe interface IParameter<TSelf> where TSelf : unmanaged, IParameter<TSelf> { }
     public unsafe interface IParameterSpanFormattable<TSelf>
         where TSelf : unmanaged, IParameterSpanFormattable<TSelf>
     {
@@ -52,9 +49,7 @@ namespace BUTR.NativeAOT.Shared
     {
         static abstract ReadOnlySpan<TValue> ToSpan(TSelf* ptr, int length);
     }
-    public unsafe interface IParameterNonPtr<TSelf> where TSelf : unmanaged, IParameterNonPtr<TSelf>
-    {
-    }
+    public unsafe interface IParameterNonPtr<TSelf> where TSelf : unmanaged, IParameterNonPtr<TSelf> { }
     public unsafe interface IParameterRawPtr<TSelf, TValue>
         where TSelf : unmanaged, IParameterRawPtr<TSelf, TValue>
         where TValue : unmanaged
@@ -107,7 +102,12 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct param_ptr : IParameter<param_ptr>, IParameterSpanFormattable<param_ptr>, IParameterRawPtr<param_ptr, VoidPtr>, IParameterIntPtr<param_ptr>
+    public readonly unsafe struct param_ptr :
+        IParameter<param_ptr>,
+        IParameterSpanFormattable<param_ptr>,
+        IParameterRawPtr<param_ptr, VoidPtr>,
+        IParameterIntPtr<param_ptr>,
+        IFormattable
     {
         public static implicit operator param_ptr*(param_ptr value) => &value;
         public static implicit operator void*(param_ptr ptr) => &ptr;
@@ -121,10 +121,16 @@ namespace BUTR.NativeAOT.Shared
 
         public readonly void* Value;
 
+        public string ToString(string? format, IFormatProvider? formatProvider) => new IntPtr(Value).ToString("x16");
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct param_bool : IParameter<param_bool>, IParameterSpanFormattable<param_bool>, IParameterNonPtr<param_bool>, ISpanFormattable
+    public readonly unsafe struct param_bool :
+        IParameter<param_bool>,
+        IParameterSpanFormattable<param_bool>,
+        IParameterNonPtr<param_bool>,
+        ISpanFormattable,
+        IUtf8SpanFormattable
     {
         public static implicit operator param_bool*(param_bool value) => &value;
         public static implicit operator param_bool(bool value) => new(value);
@@ -141,10 +147,17 @@ namespace BUTR.NativeAOT.Shared
         public string ToString(string? format, IFormatProvider? formatProvider) => Value.ToString(format, formatProvider);
         public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
             Value.TryFormat(destination, out charsWritten, format, provider);
+        public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
+            Value.TryFormat(utf8Destination, out bytesWritten, format, provider);
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct param_int : IParameter<param_int>, IParameterSpanFormattable<param_int>, IParameterNonPtr<param_int>, ISpanFormattable
+    public readonly unsafe struct param_int :
+        IParameter<param_int>,
+        IParameterSpanFormattable<param_int>,
+        IParameterNonPtr<param_int>,
+        ISpanFormattable,
+        IUtf8SpanFormattable
     {
         public static implicit operator param_int*(param_int value) => &value;
         public static implicit operator param_int(int value) => new(value);
@@ -161,10 +174,17 @@ namespace BUTR.NativeAOT.Shared
         public string ToString(string? format, IFormatProvider? formatProvider) => Value.ToString(format, formatProvider);
         public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
             Value.TryFormat(destination, out charsWritten, format, provider);
+        public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
+            Value.TryFormat(utf8Destination, out bytesWritten, format, provider);
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct param_uint : IParameter<param_uint>, IParameterSpanFormattable<param_uint>, IParameterNonPtr<param_uint>, ISpanFormattable
+    public readonly unsafe struct param_uint :
+        IParameter<param_uint>,
+        IParameterSpanFormattable<param_uint>,
+        IParameterNonPtr<param_uint>,
+        ISpanFormattable,
+        IUtf8SpanFormattable
     {
         public static implicit operator param_uint*(param_uint value) => &value;
         public static implicit operator param_uint(uint value) => new(value);
@@ -181,10 +201,17 @@ namespace BUTR.NativeAOT.Shared
         public string ToString(string? format, IFormatProvider? formatProvider) => Value.ToString(format, formatProvider);
         public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
             Value.TryFormat(destination, out charsWritten, format, provider);
+        public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
+            Value.TryFormat(utf8Destination, out bytesWritten, format, provider);
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct param_string : IParameter<param_string>, IParameterSpanFormattable<param_string>, IParameterRawPtr<param_string, char>, IParameterIntPtr<param_string>
+    public readonly unsafe struct param_string :
+        IParameter<param_string>,
+        IParameterSpanFormattable<param_string>,
+        IParameterRawPtr<param_string, char>,
+        IParameterIntPtr<param_string>,
+        IFormattable
     {
         public static implicit operator param_string*(param_string value) => &value;
         public static implicit operator char*(param_string ptr) => (char*) &ptr;
@@ -197,10 +224,17 @@ namespace BUTR.NativeAOT.Shared
         public static char* ToRawPtr(param_string* ptr) => (char*) ptr;
 
         public readonly char* Value;
+
+        public string ToString(string? format, IFormatProvider? formatProvider) => $"[{new IntPtr(Value):x16}]: {ToSpan(this).ToString()}";
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct param_json : IParameter<param_json>, IParameterSpanFormattable<param_json>, IParameterRawPtr<param_json, char>, IParameterIntPtr<param_json>
+    public readonly unsafe struct param_json :
+        IParameter<param_json>,
+        IParameterSpanFormattable<param_json>,
+        IParameterRawPtr<param_json, char>,
+        IParameterIntPtr<param_json>,
+        IFormattable
     {
         public static implicit operator param_json*(param_json value) => &value;
         public static implicit operator char*(param_json ptr) => (char*) &ptr;
@@ -212,10 +246,18 @@ namespace BUTR.NativeAOT.Shared
         public static char* ToRawPtr(param_json* ptr) => (char*) ptr;
 
         public readonly char* Value;
+        
+        public string ToString(string? format, IFormatProvider? formatProvider) => $"[{new IntPtr(Value):x16}]: {ToSpan(this).ToString()}";
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct param_data : IParameter<param_data>, IParameterSpanFormattable<param_data>, IParameterSpan<param_data, byte>, IParameterRawPtr<param_data, byte>, IParameterIntPtr<param_data>
+    public readonly unsafe struct param_data :
+        IParameter<param_data>,
+        IParameterSpanFormattable<param_data>,
+        IParameterSpan<param_data, byte>,
+        IParameterRawPtr<param_data, byte>,
+        IParameterIntPtr<param_data>,
+        IFormattable
     {
         public static implicit operator param_data*(param_data value) => &value;
         public static implicit operator byte*(param_data ptr) => (byte*) &ptr;
@@ -229,10 +271,18 @@ namespace BUTR.NativeAOT.Shared
         public static byte* ToRawPtr(param_data* ptr) => (byte*) ptr;
 
         public readonly byte* Value;
+        
+        public string ToString(string? format, IFormatProvider? formatProvider) => $"[{new IntPtr(Value):x16}]";
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct param_callback : IParameter<param_callback>, IParameterSpanFormattable<param_callback>, IParameterSpan<param_callback, byte>, IParameterRawPtr<param_callback, byte>, IParameterIntPtr<param_callback>
+    public readonly unsafe struct param_callback :
+        IParameter<param_callback>,
+        IParameterSpanFormattable<param_callback>,
+        IParameterSpan<param_callback, byte>,
+        IParameterRawPtr<param_callback, byte>,
+        IParameterIntPtr<param_callback>,
+        IFormattable
     {
         public static implicit operator param_callback*(param_callback value) => &value;
         public static implicit operator byte*(param_callback ptr) => (byte*) &ptr;
@@ -247,11 +297,16 @@ namespace BUTR.NativeAOT.Shared
 
         public readonly void* CallbackPtr;
         public readonly delegate* unmanaged[Cdecl]<param_ptr*, param_ptr*, void> Callback;
+        
+        public string ToString(string? format, IFormatProvider? formatProvider) => $"[{new IntPtr(CallbackPtr):x16}]";
     }
 
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_void : IReturnValueWithNoValue<return_value_void>, IReturnValueWithError<return_value_void>, IReturnValueWithException<return_value_void>
+    public readonly unsafe struct return_value_void :
+        IReturnValueWithNoValue<return_value_void>,
+        IReturnValueWithError<return_value_void>,
+        IReturnValueWithException<return_value_void>
     {
         public static return_value_void* AsValue(bool isOwner) => Utils.Create(new return_value_void(null), isOwner);
         public static return_value_void* AsError(char* error, bool isOwner) => Utils.Create(new return_value_void(error), isOwner);
@@ -266,7 +321,11 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_string : IReturnValueWithValuePtr<return_value_string, char>, IReturnValueWithValue<return_value_string, string>, IReturnValueWithError<return_value_string>, IReturnValueWithException<return_value_string>
+    public readonly unsafe struct return_value_string :
+        IReturnValueWithValuePtr<return_value_string, char>,
+        IReturnValueWithValue<return_value_string, string>,
+        IReturnValueWithError<return_value_string>,
+        IReturnValueWithException<return_value_string>
     {
         public static return_value_string* AsValue(string value, bool isOwner) => Utils.Create(new return_value_string(Utils.Copy(value, isOwner), null), isOwner);
         public static return_value_string* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_string(value, null), isOwner);
@@ -284,7 +343,11 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_json : IReturnValueWithValuePtr<return_value_json, char>, IReturnValueWithValueJson<return_value_json>, IReturnValueWithError<return_value_json>, IReturnValueWithException<return_value_json>
+    public readonly unsafe struct return_value_json :
+        IReturnValueWithValuePtr<return_value_json, char>,
+        IReturnValueWithValueJson<return_value_json>,
+        IReturnValueWithError<return_value_json>,
+        IReturnValueWithException<return_value_json>
     {
         public static return_value_json* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) where TValue: class => AsValue(Utils.SerializeJsonCopy(value, jsonTypeInfo, isOwner), isOwner);
         public static return_value_json* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_json(value, null), isOwner);
@@ -302,7 +365,10 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_data : IReturnValueWithValueLength<return_value_data, byte>, IReturnValueWithError<return_value_data>, IReturnValueWithException<return_value_data>
+    public readonly unsafe struct return_value_data :
+        IReturnValueWithValueLength<return_value_data, byte>,
+        IReturnValueWithError<return_value_data>,
+        IReturnValueWithException<return_value_data>
     {
         public static return_value_data* AsValue(byte* value, int length, bool isOwner) => Utils.Create(new return_value_data(value, length, null), isOwner);
         public static return_value_data* AsError(char* error, bool isOwner) => Utils.Create(new return_value_data(null, 0, error), isOwner);
@@ -321,7 +387,10 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_bool : IReturnValueWithValue<return_value_bool, bool>, IReturnValueWithError<return_value_bool>, IReturnValueWithException<return_value_bool>
+    public readonly unsafe struct return_value_bool :
+        IReturnValueWithValue<return_value_bool, bool>,
+        IReturnValueWithError<return_value_bool>,
+        IReturnValueWithException<return_value_bool>
     {
         public static return_value_bool* AsValue(bool value, bool isOwner) => Utils.Create(new return_value_bool(value, null), isOwner);
         public static return_value_bool* AsError(char* error, bool isOwner) => Utils.Create(new return_value_bool(false, error), isOwner);
@@ -338,7 +407,10 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_int32 : IReturnValueWithValue<return_value_int32, int>, IReturnValueWithError<return_value_int32>, IReturnValueWithException<return_value_int32>
+    public readonly unsafe struct return_value_int32 :
+        IReturnValueWithValue<return_value_int32, int>,
+        IReturnValueWithError<return_value_int32>,
+        IReturnValueWithException<return_value_int32>
     {
         public static return_value_int32* AsValue(int value, bool isOwner) => Utils.Create(new return_value_int32(value, null), isOwner);
         public static return_value_int32* AsError(char* error, bool isOwner) => Utils.Create(new return_value_int32(0, null), isOwner);
@@ -355,7 +427,10 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_uint32 : IReturnValueWithValue<return_value_uint32, uint>, IReturnValueWithError<return_value_uint32>, IReturnValueWithException<return_value_uint32>
+    public readonly unsafe struct return_value_uint32 :
+        IReturnValueWithValue<return_value_uint32, uint>,
+        IReturnValueWithError<return_value_uint32>,
+        IReturnValueWithException<return_value_uint32>
     {
         public static return_value_uint32* AsValue(uint value, bool isOwner) => Utils.Create(new return_value_uint32(value, null), isOwner);
         public static return_value_uint32* AsError(char* error, bool isOwner) => Utils.Create(new return_value_uint32(0, error), isOwner);
@@ -372,7 +447,10 @@ namespace BUTR.NativeAOT.Shared
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct return_value_ptr : IReturnValueWithValuePtr<return_value_ptr, VoidPtr>, IReturnValueWithError<return_value_ptr>, IReturnValueWithException<return_value_ptr>
+    public readonly unsafe struct return_value_ptr :
+        IReturnValueWithValuePtr<return_value_ptr, VoidPtr>,
+        IReturnValueWithError<return_value_ptr>,
+        IReturnValueWithException<return_value_ptr>
     {
         public static return_value_ptr* AsValue(VoidPtr* value, bool isOwner) => Utils.Create(new return_value_ptr(value, null), isOwner);
         public static return_value_ptr* AsError(char* error, bool isOwner) => Utils.Create(new return_value_ptr(null, error), isOwner);
