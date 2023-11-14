@@ -88,7 +88,7 @@ namespace BUTR.NativeAOT.Shared
     {
         static abstract TSelf* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) where TValue: class;
     }
-    public unsafe interface IReturnValueWithValueLength<TSelf, in TValue>
+    public unsafe interface IReturnValueWithValueLength<TSelf, TValue>
         where TSelf : unmanaged, IReturnValueWithValueLength<TSelf, TValue>
         where TValue : unmanaged
     {
