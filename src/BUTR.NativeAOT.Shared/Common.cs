@@ -86,7 +86,7 @@ namespace BUTR.NativeAOT.Shared
     public unsafe interface IReturnValueWithValueJson<TSelf>
         where TSelf : unmanaged, IReturnValueWithValueJson<TSelf>
     {
-        static abstract TSelf* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) where TValue: class;
+        static abstract TSelf* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) where TValue : class;
     }
     public unsafe interface IReturnValueWithValueLength<TSelf, TValue>
         where TSelf : unmanaged, IReturnValueWithValueLength<TSelf, TValue>
@@ -145,9 +145,9 @@ namespace BUTR.NativeAOT.Shared
         private param_bool(bool value) => Value = (byte) (value ? 1 : 0);
 
         public string ToString(string? format, IFormatProvider? formatProvider) => Value.ToString(format, formatProvider);
-        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
+        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) =>
             Value.TryFormat(destination, out charsWritten, format, provider);
-        public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
+        public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider) =>
             Value.TryFormat(utf8Destination, out bytesWritten, format, provider);
     }
 
@@ -172,9 +172,9 @@ namespace BUTR.NativeAOT.Shared
         private param_int(int value) => Value = value;
 
         public string ToString(string? format, IFormatProvider? formatProvider) => Value.ToString(format, formatProvider);
-        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
+        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) =>
             Value.TryFormat(destination, out charsWritten, format, provider);
-        public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
+        public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider) =>
             Value.TryFormat(utf8Destination, out bytesWritten, format, provider);
     }
 
@@ -199,9 +199,9 @@ namespace BUTR.NativeAOT.Shared
         private param_uint(uint value) => Value = value;
 
         public string ToString(string? format, IFormatProvider? formatProvider) => Value.ToString(format, formatProvider);
-        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
+        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) =>
             Value.TryFormat(destination, out charsWritten, format, provider);
-        public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider) => 
+        public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider) =>
             Value.TryFormat(utf8Destination, out bytesWritten, format, provider);
     }
 
@@ -247,7 +247,7 @@ namespace BUTR.NativeAOT.Shared
         public static char* ToRawPtr(param_json* ptr) => (char*) ptr;
 
         public readonly char* Value;
-        
+
         public string ToString(string? format, IFormatProvider? formatProvider) => $"[{new IntPtr(Value):x16}]: {ToSpan(this).ToString()}";
     }
 
@@ -273,7 +273,7 @@ namespace BUTR.NativeAOT.Shared
         public static byte* ToRawPtr(param_data* ptr) => (byte*) ptr;
 
         public readonly byte* Value;
-        
+
         public string ToString(string? format, IFormatProvider? formatProvider) => $"[{new IntPtr(Value):x16}]";
     }
 
@@ -346,7 +346,7 @@ namespace BUTR.NativeAOT.Shared
         IReturnValueWithError<return_value_json>,
         IReturnValueWithException<return_value_json>
     {
-        public static return_value_json* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) where TValue: class => AsValue(Utils.SerializeJsonCopy(value, jsonTypeInfo, isOwner), isOwner);
+        public static return_value_json* AsValue<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) where TValue : class => AsValue(Utils.SerializeJsonCopy(value, jsonTypeInfo, isOwner), isOwner);
         public static return_value_json* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_json(value, null), isOwner);
         public static return_value_json* AsError(char* error, bool isOwner) => Utils.Create(new return_value_json(null, error), isOwner);
         public static return_value_json* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_json>(e, isOwner);

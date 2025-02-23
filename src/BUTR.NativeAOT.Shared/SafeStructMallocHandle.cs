@@ -33,6 +33,7 @@ namespace BUTR.NativeAOT.Shared
     using global::System;
     using global::System.Runtime.CompilerServices;
     using global::System.Text.Json.Serialization.Metadata;
+    using global::System.Threading.Tasks;
 
     internal unsafe class SafeStructMallocHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
@@ -96,20 +97,6 @@ namespace BUTR.NativeAOT.Shared
             throw new NativeCallException(new string(hError));
         }
 
-        public SafeStringMallocHandle ValueAsJson<TValue>()
-        {
-            if (typeof(TStruct) != typeof(return_value_json))
-                throw new Exception();
-
-            var ptr = (return_value_json*) Value;
-            if (ptr->Error is null)
-            {
-                return new SafeStringMallocHandle(ptr->Value, IsOwner);
-            }
-
-            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
-            throw new NativeCallException(new string(hError));
-        }
         public TValue? ValueAsJson<TValue>(JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null) where TValue : class
         {
             if (typeof(TStruct) != typeof(return_value_json))
@@ -136,11 +123,11 @@ namespace BUTR.NativeAOT.Shared
             {
                 return new SafeDataMallocHandle(ptr->Value, ptr->Length, IsOwner);
             }
-            
+
             using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
             throw new NativeCallException(new string(hError));
         }
-        
+
         public bool ValueAsBool()
         {
             if (typeof(TStruct) != typeof(return_value_bool))
@@ -199,6 +186,176 @@ namespace BUTR.NativeAOT.Shared
 
             using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
             throw new NativeCallException(new string(hError));
+        }
+
+
+        public void SetAsVoid(TaskCompletionSource<object?> tcs)
+        {
+            if (typeof(TStruct) != typeof(return_value_void))
+            {
+                tcs.TrySetException(new Exception());
+                return;
+            }
+
+            var ptr = (return_value_void*) Value;
+            if (ptr->Error is null)
+            {
+                tcs.TrySetResult(null);
+                return;
+            }
+
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
+            tcs.TrySetException(new NativeCallException(new string(hError)));
+        }
+
+        public void SetAsString(TaskCompletionSource<string?> tcs)
+        {
+            if (typeof(TStruct) != typeof(return_value_string))
+            {
+                tcs.TrySetException(new Exception());
+                return;
+            }
+
+            var ptr = (return_value_string*) Value;
+            if (ptr->Error is null)
+            {
+                if (ptr->Value is null)
+                {
+                    tcs.TrySetResult(null);
+                }
+                else
+                {
+                    using var hValue = new SafeStringMallocHandle(ptr->Value, IsOwner);
+                    tcs.TrySetResult(hValue.ToString());
+                }
+                return;
+            }
+
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
+            tcs.TrySetException(new NativeCallException(new string(hError)));
+        }
+
+        public void SetAsJson<TValue>(TaskCompletionSource<TValue?> tcs, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null) where TValue : class
+        {
+            if (typeof(TStruct) != typeof(return_value_json))
+            {
+                tcs.TrySetException(new Exception());
+                return;
+            }
+
+            var ptr = (return_value_json*) Value;
+            if (ptr->Error is null)
+            {
+                using var json = new SafeStringMallocHandle(ptr->Value, IsOwner);
+                tcs.TrySetResult(Utils.DeserializeJson(json, jsonTypeInfo, caller));
+                return;
+            }
+
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
+            tcs.TrySetException(new NativeCallException(new string(hError)));
+        }
+
+        public void SetAsData(TaskCompletionSource<byte[]?> tcs)
+        {
+            if (typeof(TStruct) != typeof(return_value_data))
+            {
+                tcs.TrySetException(new Exception());
+                return;
+            }
+
+            var ptr = (return_value_data*) Value;
+            if (ptr->Error is null)
+            {
+                if (ptr->Value is null)
+                {
+                    tcs.TrySetResult(null);
+                }
+                else
+                {
+                    using var hValue = new SafeDataMallocHandle(ptr->Value, ptr->Length, IsOwner);
+                    tcs.TrySetResult(hValue.ToSpan().ToArray());
+                }
+                return;
+            }
+
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
+            tcs.TrySetException(new NativeCallException(new string(hError)));
+        }
+
+        public void SetAsBool(TaskCompletionSource<bool> tcs)
+        {
+            if (typeof(TStruct) != typeof(return_value_bool))
+            {
+                tcs.TrySetException(new Exception());
+                return;
+            }
+
+            var ptr = (return_value_bool*) Value;
+            if (ptr->Error is null)
+            {
+                tcs.TrySetResult(ptr->Value == 1);
+                return;
+            }
+
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
+            tcs.TrySetException(new NativeCallException(new string(hError)));
+        }
+
+        public void SetAsUInt32(TaskCompletionSource<uint> tcs)
+        {
+            if (typeof(TStruct) != typeof(return_value_uint32))
+            {
+                tcs.TrySetException(new Exception());
+                return;
+            }
+
+            var ptr = (return_value_uint32*) Value;
+            if (ptr->Error is null)
+            {
+                tcs.TrySetResult(ptr->Value);
+                return;
+            }
+
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
+            tcs.TrySetException(new NativeCallException(new string(hError)));
+        }
+
+        public void SetAsInt32(TaskCompletionSource<int> tcs)
+        {
+            if (typeof(TStruct) != typeof(return_value_int32))
+            {
+                tcs.TrySetException(new Exception());
+                return;
+            }
+
+            var ptr = (return_value_int32*) Value;
+            if (ptr->Error is null)
+            {
+                tcs.TrySetResult(ptr->Value);
+                return;
+            }
+
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
+            tcs.TrySetException(new NativeCallException(new string(hError)));
+        }
+
+        public void SetAsPointer(TaskCompletionSource<IntPtr> tcs)
+        {
+            if (typeof(TStruct) != typeof(return_value_ptr))
+            {
+                tcs.TrySetException(new Exception());
+                return;
+            }
+
+            var ptr = (return_value_ptr*) Value;
+            if (ptr->Error is null)
+            {
+                tcs.TrySetResult(new(ptr->Value));
+                return;
+            }
+
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
+            tcs.TrySetException(new NativeCallException(new string(hError)));
         }
     }
 }

@@ -42,17 +42,17 @@ namespace BUTR.NativeAOT.Shared
             where TSelf : unmanaged, IReturnValueWithError<TSelf> => TSelf.AsError(Copy(e.ToString(), isOwner), isOwner);
 
         public static SafeStringMallocHandle SerializeJsonCopy<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner)
-            where TValue: class => Copy(SerializeJson(value, jsonTypeInfo), isOwner);
+            where TValue : class => Copy(SerializeJson(value, jsonTypeInfo), isOwner);
 
         public static string SerializeJson<TValue>(TValue? value, JsonTypeInfo<TValue> jsonTypeInfo)
-            where TValue: class => value is null ? string.Empty : JsonSerializer.Serialize(value, jsonTypeInfo);
+            where TValue : class => value is null ? string.Empty : JsonSerializer.Serialize(value, jsonTypeInfo);
 
         public static TValue? DeserializeJson<TValue>(SafeStringMallocHandle json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
-            where TValue: class => json.IsInvalid ? null : DeserializeJson(json.ToSpan(), jsonTypeInfo, caller);
+            where TValue : class => json.IsInvalid ? null : DeserializeJson(json.ToSpan(), jsonTypeInfo, caller);
 
         [return: NotNullIfNotNull(nameof(json))]
         public static unsafe TValue? DeserializeJson<TValue>(param_json* json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
-            where TValue: class => json is null ? null : DeserializeJson(param_json.ToSpan(json), jsonTypeInfo, caller);
+            where TValue : class => json is null ? null : DeserializeJson(param_json.ToSpan(json), jsonTypeInfo, caller);
 
         private static TValue? DeserializeJson<TValue>([StringSyntax(StringSyntaxAttribute.Json)] ReadOnlySpan<char> json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
         {
@@ -73,7 +73,7 @@ namespace BUTR.NativeAOT.Shared
             data.CopyTo(new Span<byte>(dst, data.Length));
             return new(dst, data.Length, isOwner);
         }
-        
+
         public static unsafe SafeStringMallocHandle Copy(in ReadOnlySpan<char> str, bool isOwner)
         {
             var size = (uint) ((str.Length + 1) * 2);
