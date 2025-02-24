@@ -45,15 +45,14 @@ public class InjectorGenerator : ISourceGenerator
         return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "__stdcall" : "__cdecl";
     }
 
-    private static string GetMethodName(IMethodSymbol method)
+    private static string? GetMethodName(IMethodSymbol method)
     {
         var attr = method.GetAttributes().FirstOrDefault(x => x.AttributeClass?.MetadataName.StartsWith("UnmanagedCallersOnly", StringComparison.Ordinal) == true);
-        if (attr?.NamedArguments.FirstOrDefault(x => x.Key == "EntryPoint") is { Value.IsNull: false, Value.Value: string entryPoint })
+        if (attr?.NamedArguments.FirstOrDefault(x => x.Key == "EntryPoint") is {Value: {IsNull: false, Value: string entryPoint}})
         {
             return entryPoint;
         }
-
-        return method.MetadataName;
+        return null;
     }
 
     private static string GetTypeName(ITypeSymbol type, ConstMetadata? constMetadataRaw = null)
@@ -177,6 +176,8 @@ public class InjectorGenerator : ISourceGenerator
         var methods = receiver.Methods.Select(x => context.Compilation.GetSemanticModel(x.SyntaxTree).GetDeclaredSymbol(x)).OfType<IMethodSymbol>();
         foreach (var (name, methodSymbol) in methods.Select(x => (GetMethodName(x), x)).OrderBy(x => x.Item1))
         {
+            if (string.IsNullOrEmpty(name))
+                continue;
             var callingConvention = GetCallingConvention(methodSymbol);
             var returnType = GetReturnType(methodSymbol, null);
             var parameters = string.Join(", ", methodSymbol.Parameters.Select(x => GetParameterType(methodSymbol, x)).Select(param => $"{param.Type} {param.Name}"));
