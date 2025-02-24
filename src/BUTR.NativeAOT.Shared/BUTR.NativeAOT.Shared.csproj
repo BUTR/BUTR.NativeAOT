@@ -7,7 +7,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <VersionOverride>0</VersionOverride>
     <Version>1.0.$(VersionOverride)</Version>
-    <DefineConstants>$(DefineConstants);BUTR_NATIVEAOT_ENABLE_WARNING;TRACK_ALLOCATIONS;</DefineConstants>
+    <DefineConstants>$(DefineConstants);BUTR_NATIVEAOT_ENABLE_WARNING;TRACK_ALLOCATIONS;BUTR_NATIVEAOT_ENABLE_VISIBLETO;</DefineConstants>
   </PropertyGroup>
 
   <!--NuGet Package-->

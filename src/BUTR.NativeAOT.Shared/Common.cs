@@ -462,6 +462,24 @@ namespace BUTR.NativeAOT.Shared
             Error = error;
         }
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly unsafe struct return_value_async :
+        IReturnValueWithNoValue<return_value_async>,
+        IReturnValueWithError<return_value_async>,
+        IReturnValueWithException<return_value_async>
+    {
+        public static return_value_async* AsValue(bool isOwner) => Utils.Create(new return_value_async(null), isOwner);
+        public static return_value_async* AsError(char* error, bool isOwner) => Utils.Create(new return_value_async(error), isOwner);
+        public static return_value_async* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_async>(e, isOwner);
+
+        public readonly char* Error;
+
+        private return_value_async(char* error)
+        {
+            Error = error;
+        }
+    }
 }
 #nullable restore
 #if !BUTR_NATIVEAOT_ENABLE_WARNING

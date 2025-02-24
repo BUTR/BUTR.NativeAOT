@@ -23,12 +23,13 @@
 #endregion
 
 #nullable enable
-using System.Runtime.CompilerServices;
 #if !BUTR_NATIVEAOT_ENABLE_WARNING
 #pragma warning disable
 #endif
 
-[assembly: InternalsVisibleTo("Bannerlord.VortexExtension.Native")]
+#if BUTR_NATIVEAOT_ENABLE_VISIBLETO
+[assembly: global::System.Runtime.CompilerServices.InternalsVisibleTo("Bannerlord.VortexExtension.Native")]
+#endif
 
 namespace BUTR.NativeAOT.Shared
 {

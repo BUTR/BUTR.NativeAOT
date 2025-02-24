@@ -69,5 +69,9 @@ public static class HeaderStrings
             param_string *const error;
             param_ptr *const value;
         } return_value_ptr;
+        typedef struct return_value_async
+        {
+            param_string *const error;
+        } return_value_async;
 ";
 }

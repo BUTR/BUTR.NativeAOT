@@ -23,7 +23,6 @@
 #endregion
 
 #nullable enable
-using System.Runtime.InteropServices;
 #if !BUTR_NATIVEAOT_ENABLE_WARNING
 #pragma warning disable
 #endif
@@ -32,6 +31,7 @@ namespace BUTR.NativeAOT.Shared
 {
     using global::System;
     using global::System.Diagnostics;
+    using global::System.Runtime.InteropServices;
 
     public static unsafe class Allocator
     {
