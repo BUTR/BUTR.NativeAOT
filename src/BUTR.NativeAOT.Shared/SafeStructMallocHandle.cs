@@ -188,8 +188,23 @@ namespace BUTR.NativeAOT.Shared
             throw new NativeCallException(new string(hError));
         }
 
+        public void ValueAsAsync()
+        {
+            if (typeof(TStruct) != typeof(return_value_async))
+                throw new Exception();
 
-        public void SetAsVoid(TaskCompletionSource<object?> tcs)
+            var ptr = (return_value_async*) Value;
+            if (ptr->Error is null)
+            {
+                return;
+            }
+
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
+            throw new NativeCallException(new string(hError));
+        }
+
+
+        public void SetAsVoid(TaskCompletionSource tcs)
         {
             if (typeof(TStruct) != typeof(return_value_void))
             {
@@ -200,7 +215,7 @@ namespace BUTR.NativeAOT.Shared
             var ptr = (return_value_void*) Value;
             if (ptr->Error is null)
             {
-                tcs.TrySetResult(null);
+                tcs.TrySetResult();
                 return;
             }
 
@@ -351,6 +366,25 @@ namespace BUTR.NativeAOT.Shared
             if (ptr->Error is null)
             {
                 tcs.TrySetResult(new(ptr->Value));
+                return;
+            }
+
+            using var hError = new SafeStringMallocHandle(ptr->Error, IsOwner);
+            tcs.TrySetException(new NativeCallException(new string(hError)));
+        }
+
+        public void SetAsAsync(TaskCompletionSource tcs)
+        {
+            if (typeof(TStruct) != typeof(return_value_async))
+            {
+                tcs.TrySetException(new Exception());
+                return;
+            }
+
+            var ptr = (return_value_async*) Value;
+            if (ptr->Error is null)
+            {
+                tcs.TrySetResult();
                 return;
             }
 
