@@ -97,7 +97,7 @@ namespace BUTR.NativeAOT.Shared
             throw new NativeCallException(new string(hError));
         }
 
-        public TValue? ValueAsJson<TValue>(JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null) where TValue : class
+        public TValue? ValueAsJson<TValue>(JsonTypeInfo<TValue?> jsonTypeInfo, [CallerMemberName] string? caller = null) where TValue : class
         {
             if (typeof(TStruct) != typeof(return_value_json))
                 throw new Exception();
@@ -235,7 +235,7 @@ namespace BUTR.NativeAOT.Shared
             tcs.TrySetException(new NativeCallException(new string(hError)));
         }
 
-        public void SetAsJson<TValue>(TaskCompletionSource<TValue?> tcs, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null) where TValue : class
+        public void SetAsJson<TValue>(TaskCompletionSource<TValue?> tcs, JsonTypeInfo<TValue?> jsonTypeInfo, [CallerMemberName] string? caller = null) where TValue : class
         {
             if (typeof(TStruct) != typeof(return_value_json))
             {

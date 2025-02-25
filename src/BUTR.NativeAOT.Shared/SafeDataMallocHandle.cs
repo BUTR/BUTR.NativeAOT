@@ -35,6 +35,8 @@ namespace BUTR.NativeAOT.Shared
 
     internal sealed unsafe class SafeDataMallocHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
+        public static SafeDataMallocHandle Create(byte* ptr, int length, bool isOwner) => new(ptr, length, isOwner);
+
         public static implicit operator param_data*(SafeDataMallocHandle handle) => (param_data*) handle.handle.ToPointer();
         public static implicit operator byte*(SafeDataMallocHandle handle) => (byte*) handle.handle.ToPointer();
 

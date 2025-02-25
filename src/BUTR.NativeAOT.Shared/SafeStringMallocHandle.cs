@@ -35,6 +35,8 @@ namespace BUTR.NativeAOT.Shared
 
     internal sealed unsafe class SafeStringMallocHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
+        public static SafeStringMallocHandle Create(char* ptr, bool isOwner) => new(ptr, isOwner);
+
         public static implicit operator param_string*(SafeStringMallocHandle handle) => (param_string*) handle.handle.ToPointer();
         public static implicit operator param_json*(SafeStringMallocHandle handle) => (param_json*) handle.handle.ToPointer();
         public static implicit operator char*(SafeStringMallocHandle handle) => (char*) handle.handle.ToPointer();

@@ -47,14 +47,14 @@ namespace BUTR.NativeAOT.Shared
         public static string SerializeJson<TValue>(TValue? value, JsonTypeInfo<TValue> jsonTypeInfo)
             where TValue : class => value is null ? string.Empty : JsonSerializer.Serialize(value, jsonTypeInfo);
 
-        public static TValue? DeserializeJson<TValue>(SafeStringMallocHandle json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
+        public static TValue? DeserializeJson<TValue>(SafeStringMallocHandle json, JsonTypeInfo<TValue?> jsonTypeInfo, [CallerMemberName] string? caller = null)
             where TValue : class => json.IsInvalid ? null : DeserializeJson(json.ToSpan(), jsonTypeInfo, caller);
 
         [return: NotNullIfNotNull(nameof(json))]
-        public static unsafe TValue? DeserializeJson<TValue>(param_json* json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
+        public static unsafe TValue? DeserializeJson<TValue>(param_json* json, JsonTypeInfo<TValue?> jsonTypeInfo, [CallerMemberName] string? caller = null)
             where TValue : class => json is null ? null : DeserializeJson(param_json.ToSpan(json), jsonTypeInfo, caller);
 
-        private static TValue? DeserializeJson<TValue>([StringSyntax(StringSyntaxAttribute.Json)] ReadOnlySpan<char> json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
+        private static TValue? DeserializeJson<TValue>([StringSyntax(StringSyntaxAttribute.Json)] ReadOnlySpan<char> json, JsonTypeInfo<TValue?> jsonTypeInfo, [CallerMemberName] string? caller = null)
         {
             try
             {
@@ -71,7 +71,7 @@ namespace BUTR.NativeAOT.Shared
         {
             var dst = (byte*) Allocator.Alloc(new UIntPtr((uint) data.Length));
             data.CopyTo(new Span<byte>(dst, data.Length));
-            return new(dst, data.Length, isOwner);
+            return SafeDataMallocHandle.Create(dst, data.Length, isOwner);
         }
 
         public static unsafe SafeStringMallocHandle Copy(in ReadOnlySpan<char> str, bool isOwner)
@@ -80,7 +80,7 @@ namespace BUTR.NativeAOT.Shared
             var dst = (char*) Allocator.Alloc(new UIntPtr(size));
             str.CopyTo(new Span<char>(dst, str.Length));
             dst[str.Length] = '\0';
-            return new(dst, isOwner);
+            return SafeStringMallocHandle.Create(dst, isOwner);
         }
 
         public static unsafe SafeStructMallocHandle<TValue> Create<TValue>(TValue value, bool isOwner) where TValue : unmanaged
