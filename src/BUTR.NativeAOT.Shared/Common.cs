@@ -324,7 +324,7 @@ namespace BUTR.NativeAOT.Shared
         IReturnValueWithError<return_value_string>,
         IReturnValueWithException<return_value_string>
     {
-        public static return_value_string* AsValue(string value, bool isOwner) => Utils.Create(new return_value_string(Utils.Copy(value, isOwner), null), isOwner);
+        public static return_value_string* AsValue(string? value, bool isOwner) => Utils.Create(new return_value_string(Utils.Copy(value, isOwner), null), isOwner);
         public static return_value_string* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_string(value, null), isOwner);
         public static return_value_string* AsError(char* error, bool isOwner) => Utils.Create(new return_value_string(null, error), isOwner);
         public static return_value_string* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_string>(e, isOwner);
