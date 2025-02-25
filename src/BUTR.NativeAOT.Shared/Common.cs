@@ -62,6 +62,11 @@ namespace BUTR.NativeAOT.Shared
         static abstract IntPtr ToPtr(TSelf* ptr);
     }
 
+    public unsafe interface IReturnValueSpanFormattable<TSelf>
+        where TSelf : unmanaged, IReturnValueSpanFormattable<TSelf>
+    {
+        static abstract ReadOnlySpan<char> ToSpan(TSelf* ptr);
+    }
     public unsafe interface IReturnValueWithError<TSelf>
         where TSelf : unmanaged, IReturnValueWithError<TSelf>
     {
@@ -264,7 +269,7 @@ namespace BUTR.NativeAOT.Shared
         public static implicit operator byte*(param_data ptr) => (byte*) &ptr;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> ToSpan(param_data* ptr) => ptr->ToString();
+        public static ReadOnlySpan<char> ToSpan(param_data* ptr) => new IntPtr(ptr->Value).ToString("x8");
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<byte> ToSpan(param_data* ptr, int length) => new(ptr->Value, length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -277,37 +282,20 @@ namespace BUTR.NativeAOT.Shared
         public string ToString(string? format, IFormatProvider? formatProvider) => $"[{new IntPtr(Value):x16}]";
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct param_callback :
-        IParameter<param_callback>,
-        IParameterSpanFormattable<param_callback>,
-        IParameterRawPtr<param_callback, byte>,
-        IParameterIntPtr<param_callback>
-    {
-        public static implicit operator param_callback*(param_callback value) => &value;
-        public static implicit operator byte*(param_callback ptr) => (byte*) &ptr;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> ToSpan(param_callback* ptr) => ptr->ToString();
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static IntPtr IParameterIntPtr<param_callback>.ToPtr(param_callback* ptr) => new(ptr);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte* ToRawPtr(param_callback* ptr) => (byte*) ptr;
-
-        public readonly void* CallbackPtr;
-        public readonly delegate* unmanaged[Cdecl]<param_ptr*, param_ptr*, void> Callback;
-    }
-
 
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct return_value_void :
         IReturnValueWithNoValue<return_value_void>,
         IReturnValueWithError<return_value_void>,
-        IReturnValueWithException<return_value_void>
+        IReturnValueWithException<return_value_void>,
+        IReturnValueSpanFormattable<return_value_void>
     {
         public static return_value_void* AsValue(bool isOwner) => Utils.Create(new return_value_void(null), isOwner);
         public static return_value_void* AsError(char* error, bool isOwner) => Utils.Create(new return_value_void(error), isOwner);
         public static return_value_void* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_void>(e, isOwner);
+        public static ReadOnlySpan<char> ToSpan(return_value_void* ptr) => ptr->Error is not null
+            ? MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Error)
+            : ReadOnlySpan<char>.Empty;
 
         public readonly char* Error;
 
@@ -322,12 +310,14 @@ namespace BUTR.NativeAOT.Shared
         IReturnValueWithValuePtr<return_value_string, char>,
         IReturnValueWithValue<return_value_string, string>,
         IReturnValueWithError<return_value_string>,
-        IReturnValueWithException<return_value_string>
+        IReturnValueWithException<return_value_string>,
+        IReturnValueSpanFormattable<return_value_string>
     {
         public static return_value_string* AsValue(string? value, bool isOwner) => Utils.Create(new return_value_string(Utils.Copy(value, isOwner), null), isOwner);
         public static return_value_string* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_string(value, null), isOwner);
         public static return_value_string* AsError(char* error, bool isOwner) => Utils.Create(new return_value_string(null, error), isOwner);
         public static return_value_string* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_string>(e, isOwner);
+        public static ReadOnlySpan<char> ToSpan(return_value_string* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Error is not null ? ptr->Error : ptr->Value);
 
         public readonly char* Error;
         public readonly char* Value;
@@ -344,12 +334,14 @@ namespace BUTR.NativeAOT.Shared
         IReturnValueWithValuePtr<return_value_json, char>,
         IReturnValueWithValueJson<return_value_json>,
         IReturnValueWithError<return_value_json>,
-        IReturnValueWithException<return_value_json>
+        IReturnValueWithException<return_value_json>,
+        IReturnValueSpanFormattable<return_value_json>
     {
         public static return_value_json* AsValue<TValue>(TValue? value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner) where TValue : class => AsValue(Utils.SerializeJsonCopy(value, jsonTypeInfo, isOwner), isOwner);
         public static return_value_json* AsValue(char* value, bool isOwner) => Utils.Create(new return_value_json(value, null), isOwner);
         public static return_value_json* AsError(char* error, bool isOwner) => Utils.Create(new return_value_json(null, error), isOwner);
         public static return_value_json* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_json>(e, isOwner);
+        public static ReadOnlySpan<char> ToSpan(return_value_json* ptr) => MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Error is not null ? ptr->Error : ptr->Value);
 
         public readonly char* Error;
         public readonly char* Value;
@@ -365,11 +357,15 @@ namespace BUTR.NativeAOT.Shared
     public readonly unsafe struct return_value_data :
         IReturnValueWithValueLength<return_value_data, byte>,
         IReturnValueWithError<return_value_data>,
-        IReturnValueWithException<return_value_data>
+        IReturnValueWithException<return_value_data>,
+        IReturnValueSpanFormattable<return_value_data>
     {
         public static return_value_data* AsValue(byte* value, int length, bool isOwner) => Utils.Create(new return_value_data(value, length, null), isOwner);
         public static return_value_data* AsError(char* error, bool isOwner) => Utils.Create(new return_value_data(null, 0, error), isOwner);
         public static return_value_data* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_data>(e, isOwner);
+        public static ReadOnlySpan<char> ToSpan(return_value_data* ptr) => ptr->Error is not null
+            ? MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Error)
+            : $"({new IntPtr(ptr->Value):x8}, {ptr->Length})";
 
         public readonly char* Error;
         public readonly byte* Value;
@@ -387,11 +383,15 @@ namespace BUTR.NativeAOT.Shared
     public readonly unsafe struct return_value_bool :
         IReturnValueWithValue<return_value_bool, bool>,
         IReturnValueWithError<return_value_bool>,
-        IReturnValueWithException<return_value_bool>
+        IReturnValueWithException<return_value_bool>,
+        IReturnValueSpanFormattable<return_value_bool>
     {
         public static return_value_bool* AsValue(bool value, bool isOwner) => Utils.Create(new return_value_bool(value, null), isOwner);
         public static return_value_bool* AsError(char* error, bool isOwner) => Utils.Create(new return_value_bool(false, error), isOwner);
         public static return_value_bool* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_bool>(e, isOwner);
+        public static ReadOnlySpan<char> ToSpan(return_value_bool* ptr) => ptr->Error is not null
+            ? MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Error)
+            : ptr->Value.ToString();
 
         public readonly char* Error;
         public readonly byte Value;
@@ -407,11 +407,15 @@ namespace BUTR.NativeAOT.Shared
     public readonly unsafe struct return_value_int32 :
         IReturnValueWithValue<return_value_int32, int>,
         IReturnValueWithError<return_value_int32>,
-        IReturnValueWithException<return_value_int32>
+        IReturnValueWithException<return_value_int32>,
+        IReturnValueSpanFormattable<return_value_int32>
     {
         public static return_value_int32* AsValue(int value, bool isOwner) => Utils.Create(new return_value_int32(value, null), isOwner);
         public static return_value_int32* AsError(char* error, bool isOwner) => Utils.Create(new return_value_int32(0, null), isOwner);
         public static return_value_int32* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_int32>(e, isOwner);
+        public static ReadOnlySpan<char> ToSpan(return_value_int32* ptr) => ptr->Error is not null
+            ? MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Error)
+            : ptr->Value.ToString();
 
         public readonly char* Error;
         public readonly int Value;
@@ -427,11 +431,15 @@ namespace BUTR.NativeAOT.Shared
     public readonly unsafe struct return_value_uint32 :
         IReturnValueWithValue<return_value_uint32, uint>,
         IReturnValueWithError<return_value_uint32>,
-        IReturnValueWithException<return_value_uint32>
+        IReturnValueWithException<return_value_uint32>,
+        IReturnValueSpanFormattable<return_value_uint32>
     {
         public static return_value_uint32* AsValue(uint value, bool isOwner) => Utils.Create(new return_value_uint32(value, null), isOwner);
         public static return_value_uint32* AsError(char* error, bool isOwner) => Utils.Create(new return_value_uint32(0, error), isOwner);
         public static return_value_uint32* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_uint32>(e, isOwner);
+        public static ReadOnlySpan<char> ToSpan(return_value_uint32* ptr) => ptr->Error is not null
+            ? MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Error)
+            : ptr->Value.ToString();
 
         public readonly char* Error;
         public readonly uint Value;
@@ -447,11 +455,15 @@ namespace BUTR.NativeAOT.Shared
     public readonly unsafe struct return_value_ptr :
         IReturnValueWithValuePtr<return_value_ptr, VoidPtr>,
         IReturnValueWithError<return_value_ptr>,
-        IReturnValueWithException<return_value_ptr>
+        IReturnValueWithException<return_value_ptr>,
+        IReturnValueSpanFormattable<return_value_ptr>
     {
         public static return_value_ptr* AsValue(VoidPtr* value, bool isOwner) => Utils.Create(new return_value_ptr(value, null), isOwner);
         public static return_value_ptr* AsError(char* error, bool isOwner) => Utils.Create(new return_value_ptr(null, error), isOwner);
         public static return_value_ptr* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_ptr>(e, isOwner);
+        public static ReadOnlySpan<char> ToSpan(return_value_ptr* ptr) => ptr->Error is not null
+            ? MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Error)
+            : new IntPtr(ptr->Value).ToString("x8");
 
         public readonly char* Error;
         public readonly void* Value;
@@ -467,11 +479,15 @@ namespace BUTR.NativeAOT.Shared
     public readonly unsafe struct return_value_async :
         IReturnValueWithNoValue<return_value_async>,
         IReturnValueWithError<return_value_async>,
-        IReturnValueWithException<return_value_async>
+        IReturnValueWithException<return_value_async>,
+        IReturnValueSpanFormattable<return_value_async>
     {
         public static return_value_async* AsValue(bool isOwner) => Utils.Create(new return_value_async(null), isOwner);
         public static return_value_async* AsError(char* error, bool isOwner) => Utils.Create(new return_value_async(error), isOwner);
         public static return_value_async* AsException(Exception e, bool isOwner) => Utils.AsException<return_value_async>(e, isOwner);
+        public static ReadOnlySpan<char> ToSpan(return_value_async* ptr) => ptr->Error is not null
+            ? MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr->Error)
+            : ReadOnlySpan<char>.Empty;
 
         public readonly char* Error;
 
