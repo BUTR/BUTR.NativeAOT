@@ -41,20 +41,20 @@ namespace BUTR.NativeAOT.Shared
         public static unsafe TSelf* AsException<TSelf>(Exception e, bool isOwner)
             where TSelf : unmanaged, IReturnValueWithError<TSelf> => TSelf.AsError(Copy(e.ToString(), isOwner), isOwner);
 
-        public static SafeStringMallocHandle SerializeJsonCopy<TValue>(TValue value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner)
+        public static SafeStringMallocHandle SerializeJsonCopy<TValue>(TValue? value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner)
             where TValue : class => Copy(SerializeJson(value, jsonTypeInfo), isOwner);
 
         public static string SerializeJson<TValue>(TValue? value, JsonTypeInfo<TValue> jsonTypeInfo)
             where TValue : class => value is null ? string.Empty : JsonSerializer.Serialize(value, jsonTypeInfo);
 
-        public static TValue? DeserializeJson<TValue>(SafeStringMallocHandle json, JsonTypeInfo<TValue?> jsonTypeInfo, [CallerMemberName] string? caller = null)
+        public static TValue? DeserializeJson<TValue>(SafeStringMallocHandle json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
             where TValue : class => json.IsInvalid ? null : DeserializeJson(json.ToSpan(), jsonTypeInfo, caller);
 
         [return: NotNullIfNotNull(nameof(json))]
-        public static unsafe TValue? DeserializeJson<TValue>(param_json* json, JsonTypeInfo<TValue?> jsonTypeInfo, [CallerMemberName] string? caller = null)
+        public static unsafe TValue? DeserializeJson<TValue>(param_json* json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
             where TValue : class => json is null ? null : DeserializeJson(param_json.ToSpan(json), jsonTypeInfo, caller);
 
-        private static TValue? DeserializeJson<TValue>([StringSyntax(StringSyntaxAttribute.Json)] ReadOnlySpan<char> json, JsonTypeInfo<TValue?> jsonTypeInfo, [CallerMemberName] string? caller = null)
+        private static TValue? DeserializeJson<TValue>([StringSyntax(StringSyntaxAttribute.Json)] ReadOnlySpan<char> json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
         {
             try
             {
