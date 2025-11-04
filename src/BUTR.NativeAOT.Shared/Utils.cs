@@ -44,8 +44,8 @@ namespace BUTR.NativeAOT.Shared
         public static SafeStringMallocHandle SerializeJsonCopy<TValue>(TValue? value, JsonTypeInfo<TValue> jsonTypeInfo, bool isOwner)
             where TValue : class => Copy(SerializeJson(value, jsonTypeInfo), isOwner);
 
-        public static string SerializeJson<TValue>(TValue? value, JsonTypeInfo<TValue> jsonTypeInfo)
-            where TValue : class => value is null ? string.Empty : JsonSerializer.Serialize(value, jsonTypeInfo);
+        public static string? SerializeJson<TValue>(TValue? value, JsonTypeInfo<TValue> jsonTypeInfo)
+            where TValue : class => value is null ? null : JsonSerializer.Serialize(value, jsonTypeInfo);
 
         public static TValue? DeserializeJson<TValue>(SafeStringMallocHandle json, JsonTypeInfo<TValue> jsonTypeInfo, [CallerMemberName] string? caller = null)
             where TValue : class => json.IsInvalid ? null : DeserializeJson(json.ToSpan(), jsonTypeInfo, caller);
@@ -72,6 +72,14 @@ namespace BUTR.NativeAOT.Shared
             var dst = (byte*) Allocator.Alloc(new UIntPtr((uint) data.Length));
             data.CopyTo(new Span<byte>(dst, data.Length));
             return SafeDataMallocHandle.Create(dst, data.Length, isOwner);
+        }
+
+        public static unsafe SafeStringMallocHandle Copy(string? str, bool isOwner)
+        {
+            if (str is null)
+                return SafeStringMallocHandle.Create(null, isOwner);
+
+            return Copy(str.AsSpan(), isOwner);
         }
 
         public static unsafe SafeStringMallocHandle Copy(in ReadOnlySpan<char> str, bool isOwner)
