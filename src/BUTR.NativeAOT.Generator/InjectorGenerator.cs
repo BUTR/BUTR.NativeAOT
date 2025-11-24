@@ -129,7 +129,8 @@ public class InjectorGenerator : ISourceGenerator
             return GetFunctionPointerParameterType(parent, functionPointerTypeSymbol, x, i);
         }));
 
-        return ($"{returnType} ({callingConvention} {name})({parameters})", string.Empty);
+        var nameOrAsterisk = string.IsNullOrEmpty(name) ? "*" : name;
+        return ($"{returnType} ({callingConvention} {nameOrAsterisk})({parameters})", string.Empty);
     }
 
     private static (string Type, string Name) GetParameterType(IMethodSymbol parent, IParameterSymbol parameterSymbol)
